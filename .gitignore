@@ -1,0 +1,24 @@
+# Videos: se publican como archivos de los Releases, no en el historial de git
+*.mp4
+*.mp4.part
+
+# Material de curso de terceros que no se publica
+fuentes/
+
+# Salidas desechables de manimgx
+*.storyboard*.png
+*.srt
+
+# LaTeX
+*.aux
+*.log
+*.out
+*.toc
+*.synctex.gz
+
+# Python
+__pycache__/
+*.pyc
+
+# Sistema
+.DS_Store

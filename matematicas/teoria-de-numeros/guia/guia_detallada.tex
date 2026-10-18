@@ -1,0 +1,847 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+%\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[margin=2.3cm]{geometry}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{manfnt}
+\usepackage{hyperref}
+\usepackage{microtype}
+
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=black,citecolor=black}
+
+\renewcommand{\contentsname}{Contenido}
+\renewcommand{\proofname}{Demostración}
+\renewcommand{\tablename}{Tabla}
+
+\newtheorem{teorema}{Teorema}[section]
+\newtheorem{lema}[teorema]{Lema}
+\newtheorem{corolario}[teorema]{Corolario}
+\theoremstyle{definition}
+\newtheorem{definicion}[teorema]{Definición}
+\newtheorem{ejemplo}[teorema]{Ejemplo}
+
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\md}[1]{\ (\mathrm{mod}\ #1)}
+\newcommand{\mcd}{\operatorname{mcd}}
+\newcommand{\mcm}{\operatorname{mcm}}
+
+% Notas de estilo libro: encabezado en versalitas, sin cajas ni colores.
+\newtheoremstyle{nota}{\topsep}{\topsep}{\normalfont}{0pt}{\scshape}{.}{0.6em}{\thmname{#1}}
+\newtheoremstyle{notait}{\topsep}{\topsep}{\itshape}{0pt}{\scshape}{.}{0.6em}{\thmname{#1}}
+\theoremstyle{notait}
+\newtheorem*{pregunta}{Pregunta}
+\theoremstyle{nota}
+\newtheorem*{intuicion}{Intuición}
+\newtheorem*{esqueleto}{Esqueleto de la prueba}
+\newtheorem*{contra}{Contraejemplo canónico}
+\newtheorem*{regla}{Regla de 1 segundo}
+\newtheorem*{trampaX}{Error común}
+\newenvironment{trampa}{\begin{trampaX}\leavevmode\marginpar{\raggedleft\vspace*{-0.9\baselineskip}\dbend}\ignorespaces}{\end{trampaX}}
+\setlength{\marginparwidth}{1.6cm}
+\reversemarginpar
+
+\setlist{itemsep=2pt,topsep=4pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+
+\title{\textbf{Teoría de Números}\\[2pt]\large Guía detallada: divisibilidad, congruencias, Euler y RSA}
+\author{Carla González Mina}
+\date{Acompaña la serie de videos \emph{Teoría de números} de \texttt{manim-clases} \,$\cdot$\, referencia: Rosen, cap.~4}
+
+\begin{document}
+\maketitle
+
+\begin{quotation}\small
+\noindent\textsc{Cómo usar esta guía.}\enspace
+Cada tema sigue el mismo orden: \textbf{la pregunta} que el tema responde, la \textbf{intuición} (lo que muestran los videos de la serie), el \textbf{enunciado formal}, la \textbf{demostración} completa y un \textbf{ejemplo numérico} resuelto línea por línea. Al final de cada tema van tres anclas de memoria: el \emph{esqueleto} de la prueba, el \emph{contraejemplo canónico} (qué se rompe si quitas una hipótesis) y la \emph{regla de 1 segundo}. Cada módulo termina con ejercicios propuestos con su solución.
+
+Todos los números de esta guía se verificaron con Python (\texttt{pow}, \texttt{math.gcd} y búsqueda exhaustiva). Todos coinciden.
+\end{quotation}
+
+\tableofcontents
+\newpage
+
+%======================================================================
+\section{Módulo 1: Divisibilidad, algoritmo de la división, MCD y TFA}
+%======================================================================
+
+\subsection{Divisibilidad}
+
+\begin{pregunta}
+¿Qué significa exactamente que un número ``quepa'' un número entero de veces en otro, y qué reglas se pueden usar sin pensarlo dos veces?
+\end{pregunta}
+
+\begin{definicion}
+Sean $a,b\in\Z$ con $a\neq 0$. Decimos que $a$ \textbf{divide} a $b$, y escribimos $a\mid b$, si existe $k\in\Z$ tal que $b=a\cdot k$. Si no existe, escribimos $a\nmid b$.
+\end{definicion}
+
+\begin{intuicion}
+$a\mid b$ quiere decir que $b$ se puede cubrir exactamente con bloques de tamaño $|a|$, sin que sobre nada. Por ejemplo, $3\mid 12$ porque $12$ son cuatro bloques de $3$, y $5\nmid 12$ porque con bloques de 5 sobran 2. Toda la teoría de esta guía sale de una sola idea: \emph{escribir lo que sabes como ``$b=ak$'' y hacer álgebra}.
+\end{intuicion}
+
+\begin{teorema}[Propiedades elementales]
+Para todos $a,b,c,x,y\in\Z$ (con divisores no nulos):
+\begin{enumerate}
+  \item $1\mid a$, $a\mid 0$ y, si $a\ne 0$, $a\mid a$.
+  \item \textbf{Transitividad:} si $a\mid b$ y $b\mid c$ entonces $a\mid c$.
+  \item \textbf{Combinación lineal:} si $a\mid b$ y $a\mid c$ entonces $a\mid (bx+cy)$.
+  \item \textbf{Acotación:} si $b\ne 0$ y $a\mid b$ entonces $|a|\le|b|$.
+  \item \textbf{Antisimetría:} si $a,b>0$, $a\mid b$ y $b\mid a$, entonces $a=b$. En $\Z$, $a=\pm b$.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+\textbf{(1)} $a=1\cdot a$, $0=a\cdot 0$ y $a=a\cdot 1$.
+
+\textbf{(2)} Hay $k,\ell\in\Z$ con $b=ak$ y $c=b\ell$. Entonces $c=(ak)\ell=a(k\ell)$ y $k\ell\in\Z$.
+
+\textbf{(3)} Hay $k,\ell$ con $b=ak$, $c=a\ell$. Entonces $bx+cy=akx+a\ell y=a(kx+\ell y)$, con $kx+\ell y\in\Z$.
+
+\textbf{(4)} $b=ak$ con $k\ne 0$ (si $k=0$ entonces $b=0$). Como $k$ es un entero no nulo, $|k|\ge 1$, así que $|b|=|a||k|\ge|a|$.
+
+\textbf{(5)} Por (4), $a\le b$ y $b\le a$, luego $a=b$. En $\Z$, aplicando (4) a valores absolutos, $|a|=|b|$.
+\end{proof}
+
+La propiedad (3) es \emph{la} herramienta del tema: casi todas las pruebas terminan diciendo ``$d$ divide a los dos términos, entonces divide a la suma''.
+
+\begin{contra}
+La recíproca de (3) es falsa: $3\mid (1+2)$ pero $3\nmid 1$ y $3\nmid 2$. Que $d$ divida una suma no dice nada de cada sumando.
+\end{contra}
+
+\begin{regla}
+Para probar $a\mid(\text{algo})$: escribe ``algo'' como $a\cdot(\text{entero})$, o como combinación lineal de cosas que $a$ ya divide.
+\end{regla}
+
+\subsection{El algoritmo de la división}
+
+\begin{pregunta}
+Si $d\nmid a$, ¿cómo se describe exactamente ``lo que sobra''? ¿Y por qué es único?
+\end{pregunta}
+
+\begin{teorema}[Algoritmo de la división]
+Dados $a\in\Z$ y $d\in\Z^{+}$, existen \textbf{únicos} $q,r\in\Z$ tales que
+\[ a=dq+r,\qquad 0\le r<d. \]
+Además $q=\lfloor a/d\rfloor$ y $r=a\bmod d=a-d\lfloor a/d\rfloor$.
+\end{teorema}
+
+\begin{intuicion}
+Sobre la recta numérica se marcan los múltiplos de $d$: $\dots,-2d,-d,0,d,2d,\dots$. El número $a$ cae en exactamente un ``cajón'' $[dq,\,d(q+1))$. El cociente $q$ dice en qué cajón cayó, y el residuo $r$ dice cuánto se avanzó dentro del cajón, que es una distancia entre $0$ y $d-1$. Por eso, \textbf{aunque $a$ sea negativo, $r$ nunca es negativo}: siempre se mide desde el múltiplo que queda \emph{a la izquierda}.
+\end{intuicion}
+
+\begin{proof}
+\textbf{Existencia.} Sea $S=\{a-dk : k\in\Z,\ a-dk\ge 0\}$. $S\ne\varnothing$: si $a\ge 0$ toma $k=0$; si $a<0$ toma $k=a$, y entonces $a-da=a(1-d)\ge 0$ porque $a<0$ y $1-d\le 0$. Por el principio del buen orden, $S$ tiene un mínimo $r=a-dq\ge 0$. Si fuera $r\ge d$, entonces $r-d=a-d(q+1)\ge 0$ estaría en $S$ y sería menor que $r$, lo cual es una contradicción. Luego $0\le r<d$.
+
+\textbf{Unicidad.} Si $a=dq+r=dq'+r'$ con $0\le r,r'<d$, entonces $d(q-q')=r'-r$. Así $d\mid(r'-r)$, pero $-d<r'-r<d$. El único múltiplo de $d$ en ese intervalo es el $0$, así que $r=r'$ y, como $d\ne0$, $q=q'$.
+\end{proof}
+
+\begin{ejemplo}
+$a=-20$, $d=3$. Los múltiplos de 3 alrededor de $-20$ son $-21$ y $-18$. El que queda a la izquierda es $-21=3\cdot(-7)$, y de $-21$ a $-20$ hay $1$. Entonces $-20=3(-7)+1$: $q=-7$, $r=1$.
+\end{ejemplo}
+
+\begin{trampa}
+$-20=3(-6)-2$ es una igualdad verdadera pero \textbf{no} es la división, porque $r=-2<0$. Si te sale un residuo negativo, réstale 1 al cociente y súmale $d$ al residuo: $(-6,-2)\to(-7,1)$.
+\end{trampa}
+
+\subsection{Máximo común divisor}
+
+\begin{definicion}
+Para $a,b\in\Z$ no ambos cero, $\mcd(a,b)=\max\{d\in\Z^+ : d\mid a\ \wedge\ d\mid b\}$. El máximo existe porque el conjunto es no vacío ($1$ está) y acotado (por la acotación, $d\le\max(|a|,|b|)$). Decimos que $a$ y $b$ son \textbf{primos relativos} (coprimos) si $\mcd(a,b)=1$.
+\end{definicion}
+
+\begin{pregunta}
+¿Cómo se calcula el MCD sin factorizar? Factorizar números grandes es difícil, pero dividir es fácil.
+\end{pregunta}
+
+\begin{lema}[Lema de Euclides para el MCD]
+Si $a=bq+r$, entonces $\mcd(a,b)=\mcd(b,r)$.
+\end{lema}
+
+\begin{proof}
+La idea es probar algo más fuerte: \emph{los dos pares tienen exactamente los mismos divisores comunes}. Entonces su máximo es el mismo.
+\begin{itemize}
+\item Si $d\mid a$ y $d\mid b$, entonces $d\mid a-bq=r$ (combinación lineal). Así $d$ es divisor común de $b$ y $r$.
+\item Si $d\mid b$ y $d\mid r$, entonces $d\mid bq+r=a$. Así $d$ es divisor común de $a$ y $b$.
+\end{itemize}
+Los dos conjuntos de divisores comunes son iguales, así que sus máximos coinciden.
+\end{proof}
+
+Un caso particular útil es $q=1$: $\mcd(x,y)=\mcd(x,y-x)$. También se puede probar con doble desigualdad $d_1\le d_2$ y $d_2\le d_1$, que es la misma idea vista desde los máximos.
+
+\subsection{Algoritmo de Euclides}
+
+\begin{intuicion}
+Dibuja un rectángulo de $a\times b$. Corta tantos cuadrados de lado $b$ como quepan (eso es $q_1$), y lo que sobra es un rectángulo de $b\times r_1$. Repite con ese rectángulo. El lado del último cuadrado, el que llena el rectángulo exacto, es el MCD: es la baldosa cuadrada más grande con la que se puede embaldosar el rectángulo original. Esto es justo lo que muestra el capítulo de Euclides en el video del módulo 1.
+\end{intuicion}
+
+\begin{teorema}
+Aplicando divisiones sucesivas
+\[
+\begin{aligned}
+a&=bq_1+r_1, & 0&\le r_1<b\\
+b&=r_1q_2+r_2, & 0&\le r_2<r_1\\
+&\ \,\vdots\\
+r_{k-2}&=r_{k-1}q_k+r_k, & 0&<r_k<r_{k-1}\\
+r_{k-1}&=r_kq_{k+1}+0,
+\end{aligned}
+\]
+el proceso termina y $\mcd(a,b)=r_k$, el \textbf{último residuo no nulo}.
+\end{teorema}
+
+\begin{proof}
+Termina porque $b>r_1>r_2>\cdots\ge 0$ es una sucesión estrictamente decreciente de naturales, que no puede ser infinita. Por el lema, $\mcd(a,b)=\mcd(b,r_1)=\cdots=\mcd(r_{k-1},r_k)=\mcd(r_k,0)=r_k$.
+\end{proof}
+
+\begin{ejemplo}
+$\mcd(89,55)$:
+\[
+\begin{array}{r@{\;=\;}l}
+89 & 1\cdot 55+34\\
+55 & 1\cdot 34+21\\
+34 & 1\cdot 21+13\\
+21 & 1\cdot 13+8\\
+13 & 1\cdot 8+5\\
+8 & 1\cdot 5+3\\
+5 & 1\cdot 3+2\\
+3 & 1\cdot 2+1\\
+2 & 2\cdot 1+0
+\end{array}
+\qquad\Rightarrow\qquad \mcd(89,55)=1.
+\]
+Todos los cocientes valen 1 porque 89 y 55 son números de Fibonacci consecutivos. Ese es el \emph{peor caso} del algoritmo: los residuos bajan lo más despacio posible (teorema de Lamé).
+\end{ejemplo}
+
+\subsection{Teorema Fundamental de la Aritmética}
+
+\begin{teorema}[TFA]
+Todo entero $n>1$ se escribe como producto de primos, $n=p_1^{a_1}p_2^{a_2}\cdots p_k^{a_k}$, y esa escritura es única salvo el orden.
+\end{teorema}
+
+\begin{proof}[Idea de la demostración]
+\emph{Existencia}, por inducción fuerte: si $n$ es primo ya está. Si no, $n=ab$ con $1<a,b<n$, y cada factor se factoriza por hipótesis inductiva. \emph{Unicidad}: si $p_1\cdots p_r=q_1\cdots q_s$, entonces $p_1$ divide al producto de los $q_j$. Por el \textbf{lema de Euclides} (Módulo 2: $p\mid ab\Rightarrow p\mid a$ o $p\mid b$), $p_1$ divide a algún $q_j$, y como $q_j$ es primo, $p_1=q_j$. Se cancela y se repite.
+\end{proof}
+
+\begin{teorema}[Euclides: hay infinitos primos]
+\end{teorema}
+\begin{proof}
+Supón que solo hay finitos primos $p_1,\dots,p_k$. Sea $N=p_1p_2\cdots p_k+1>1$. Por el TFA, $N$ tiene algún factor primo $p$, que tiene que ser uno de los $p_i$. Entonces $p\mid N$ y $p\mid p_1\cdots p_k$, luego $p\mid N-p_1\cdots p_k=1$. Eso es imposible porque $p>1$.
+\end{proof}
+
+\begin{contra}
+La prueba \textbf{no} dice que $N$ sea primo. $2\cdot3\cdot5\cdot7\cdot11\cdot13+1=30031=59\cdot 509$. Lo que dice es que los factores primos de $N$ son \emph{nuevos}, es decir, que no están en la lista.
+\end{contra}
+
+\textbf{MCD y MCM con la factorización.} Si $a=\prod p_i^{\alpha_i}$ y $b=\prod p_i^{\beta_i}$ (permitiendo exponentes $0$):
+\[
+\mcd(a,b)=\prod p_i^{\min(\alpha_i,\beta_i)},\qquad \mcm(a,b)=\prod p_i^{\max(\alpha_i,\beta_i)},\qquad a\cdot b=\mcd(a,b)\cdot\mcm(a,b).
+\]
+La última igualdad sale de que $\min(\alpha,\beta)+\max(\alpha,\beta)=\alpha+\beta$ para cada primo.
+
+\begin{ejemplo}
+$a=2^3\cdot3^2\cdot7=504$, $b=2\cdot3^4\cdot5=810$. Entonces $\mcd=2^1\cdot3^2=18$ y $\mcm=2^3\cdot3^4\cdot5\cdot7=22680$. Comprobación: $504\cdot810=408240=18\cdot22680$.
+\end{ejemplo}
+
+\begin{esqueleto}
+\textbf{MCD por Euclides:} (1) dividir; (2) el par $(a,b)$ se reemplaza por $(b,r)$ porque tienen los mismos divisores comunes; (3) los residuos bajan estrictamente, así que el proceso termina; (4) $\mcd(r_k,0)=r_k$.
+\end{esqueleto}
+
+\begin{regla}
+¿Números grandes? Euclides. ¿Ya factorizados? Mínimo de exponentes para el MCD y máximo para el MCM.
+\end{regla}
+
+\subsection*{Ejercicios del Módulo 1}
+\begin{enumerate}[label=\textbf{1.\arabic*}]
+\item Halla $q$ y $r$ para $a=-47$, $d=6$.\\
+\emph{Sol.} El múltiplo de 6 a la izquierda de $-47$ es $-48=6(-8)$. Entonces $-47=6(-8)+1$: $q=-8$, $r=1$.
+\item Calcula $\mcd(252,198)$ con Euclides.\\
+\emph{Sol.} $252=1\cdot198+54$, $198=3\cdot54+36$, $54=1\cdot36+18$, $36=2\cdot18+0$. El MCD es $18$.
+\item Si $a\mid b$ y $a\mid b+2$, prueba que $a\mid 2$.\\
+\emph{Sol.} Por combinación lineal, $a\mid (b+2)\cdot1+b\cdot(-1)=2$.
+\item Prueba que $\mcd(n,n+1)=1$ para todo $n$.\\
+\emph{Sol.} Si $d\mid n$ y $d\mid n+1$, entonces $d\mid (n+1)-n=1$, así que $d=1$.
+\end{enumerate}
+
+\newpage
+%======================================================================
+\section{Módulo 2: Bézout, Euclides extendido e inversos modulares}
+%======================================================================
+
+\subsection{La identidad de Bézout}
+
+\begin{pregunta}
+El MCD se definió como ``el mayor divisor común'', que es una noción \emph{multiplicativa}. ¿Se puede describir también de forma \emph{aditiva}, con sumas de múltiplos de $a$ y $b$?
+\end{pregunta}
+
+\begin{intuicion}
+Imagina que tienes dos reglas, una de $a$ cm y otra de $b$ cm, sin marcas. Poniéndolas una detrás de otra o restándolas, ¿qué longitudes puedes medir? Exactamente los números $sa+tb$. Con $a=6$ y $b=10$ solo se pueden medir múltiplos de $2$, y se puede medir el $2$ mismo: $2=2\cdot6-1\cdot10$. La longitud más pequeña que puedes medir es el MCD, y todas las demás son múltiplos de ella. En el video esto se ve como una rejilla de puntos $(s,t)$, cada uno con su valor $sa+tb$.
+\end{intuicion}
+
+\begin{teorema}[Bézout]
+Si $a,b\in\Z$ no son ambos cero, existen $s,t\in\Z$ tales que $\mcd(a,b)=sa+tb$. Además, $\mcd(a,b)$ es el \textbf{mínimo} elemento positivo del conjunto $L=\{sa+tb: s,t\in\Z\}$.
+\end{teorema}
+
+\begin{proof}
+$L$ tiene elementos positivos (por ejemplo $a\cdot a+b\cdot b>0$). Sea $g=s_0a+t_0b$ el menor de ellos (buen orden).
+
+\emph{$g$ divide a $a$.} Dividimos: $a=gq+r$ con $0\le r<g$. Entonces $r=a-gq=a-(s_0a+t_0b)q=(1-s_0q)a+(-t_0q)b\in L$. Si $r>0$, sería un elemento positivo de $L$ menor que $g$, lo cual es imposible. Así $r=0$ y $g\mid a$. Con el mismo argumento, $g\mid b$.
+
+\emph{$g$ es el mayor.} Si $d\mid a$ y $d\mid b$, entonces $d\mid s_0a+t_0b=g$, luego $d\le g$.
+
+Así $g$ es un divisor común y es mayor o igual que cualquier otro, es decir, $g=\mcd(a,b)$.
+\end{proof}
+
+\begin{corolario}[Criterio de coprimalidad]
+$\mcd(a,b)=1\iff$ existen $s,t\in\Z$ con $sa+tb=1$.
+\end{corolario}
+\begin{proof}
+($\Rightarrow$) es Bézout. ($\Leftarrow$) Si $d\mid a$ y $d\mid b$, entonces $d\mid sa+tb=1$, así que $d=1$.
+\end{proof}
+
+\begin{trampa}
+Para un $g$ cualquiera, $sa+tb=g$ \textbf{no} implica $g=\mcd(a,b)$: $1\cdot 6+1\cdot 10=16$, y $\mcd(6,10)=2$. Lo único que se puede concluir es que $\mcd(a,b)\mid g$. La implicación de vuelta solo funciona con $g=1$.
+\end{trampa}
+
+\subsection{Los tres lemas que salen de Bézout}
+
+\begin{lema}[Divisibilidad coprima]\label{lem:coprima}
+Si $a\mid bc$ y $\mcd(a,b)=1$, entonces $a\mid c$.
+\end{lema}
+\begin{proof}[Demostración (la plantilla)]
+\begin{enumerate}
+\item Como $\mcd(a,b)=1$, por Bézout existen $s,t$ con $sa+tb=1$.
+\item Se multiplica por $c$: $sac+tbc=c$.
+\item $a\mid sac$ porque $sac=a(sc)$, y $a\mid tbc$ porque $bc=ak$ por hipótesis, así que $tbc=a(tk)$.
+\item Por combinación lineal, $a\mid sac+tbc=c$.\qedhere
+\end{enumerate}
+\end{proof}
+Un ejercicio típico se resuelve exactamente igual, con $d$ en lugar de $a$: $dx+by=1\Rightarrow adx+aby=a\Rightarrow d(ax+ky)=a$.
+
+\begin{contra}
+Sin la coprimalidad falla: $6\mid 4\cdot 3=12$ pero $6\nmid 3$. El factor $2$ del $6$ ``se escondió'' en el $4$.
+\end{contra}
+
+\begin{lema}[Lema de Euclides]
+Si $p$ es primo y $p\mid ab$, entonces $p\mid a$ o $p\mid b$.
+\end{lema}
+\begin{proof}
+Si $p\mid a$ no hay nada que probar. Si $p\nmid a$, los únicos divisores positivos de $p$ son $1$ y $p$, y $p$ no divide a $a$, así que $\mcd(p,a)=1$. Por el lema anterior, $p\mid b$.
+\end{proof}
+
+\begin{contra}
+Con un compuesto falla: $6\mid 2\cdot 3$ pero $6\nmid2$ y $6\nmid3$. Este lema es lo que hace únicos a los primos, y es la pieza clave de la unicidad en el TFA y de los autoinversos en el Módulo 4.
+\end{contra}
+
+\begin{lema}[División múltiple coprima]
+Si $a\mid c$, $b\mid c$ y $\mcd(a,b)=1$, entonces $ab\mid c$.
+\end{lema}
+\begin{proof}
+$c=ak$. Como $b\mid ak$ y $\mcd(b,a)=1$, por el Lema~\ref{lem:coprima} $b\mid k$, es decir, $k=b\ell$. Entonces $c=ab\ell$.
+\end{proof}
+\begin{contra}
+$4\mid 12$ y $6\mid 12$, pero $24\nmid 12$. Comparten el factor $2$ y lo estarías contando dos veces.
+\end{contra}
+
+\begin{lema}[mcd con un producto]
+Si $\mcd(a,b)=1$ y $\mcd(a,c)=1$, entonces $\mcd(a,bc)=1$.
+\end{lema}
+\begin{proof}
+Por Bézout, $ax_1+by_1=1$ y $ax_2+cy_2=1$. Se multiplican las dos igualdades:
+\[
+1=(ax_1+by_1)(ax_2+cy_2)=a\underbrace{(ax_1x_2+x_1cy_2+by_1x_2)}_{X}+(bc)\underbrace{(y_1y_2)}_{Y}.
+\]
+Como $X,Y\in\Z$, el criterio de coprimalidad (con $\Leftarrow$) da $\mcd(a,bc)=1$.
+\end{proof}
+La idea de \emph{multiplicar dos identidades de Bézout} sirve siempre que haya que probar coprimalidad con un producto.
+
+\subsection{Algoritmo extendido de Euclides}
+
+\begin{pregunta}
+Bézout dice que $s,t$ existen. ¿Cómo se encuentran?
+\end{pregunta}
+
+\textbf{Método 1: sustitución hacia atrás.} Se despeja cada residuo de las divisiones y se sustituye de abajo hacia arriba, dejando siempre la expresión como combinación de los \emph{dos residuos más recientes}.
+
+\begin{ejemplo}[$1$ como combinación de $89$ y $55$]
+Despejando los residuos de la tabla de la sección anterior:
+\[
+\begin{aligned}
+1 &= 3-1\cdot 2\\
+  &= 3-(5-1\cdot 3)= 2\cdot 3-5\\
+  &= 2(8-5)-5 = 2\cdot 8-3\cdot 5\\
+  &= 2\cdot 8-3(13-8) = 5\cdot 8-3\cdot 13\\
+  &= 5(21-13)-3\cdot13 = 5\cdot 21-8\cdot 13\\
+  &= 5\cdot21-8(34-21) = 13\cdot 21-8\cdot 34\\
+  &= 13(55-34)-8\cdot34 = 13\cdot 55-21\cdot 34\\
+  &= 13\cdot55-21(89-55) = 34\cdot 55-21\cdot 89.
+\end{aligned}
+\]
+Verificación: $34\cdot55=1870$, $21\cdot 89=1869$ y $1870-1869=1$. Otra respuesta válida es $1=34\cdot89-55\cdot55$ ($3026-3025=1$): los coeficientes de Bézout \textbf{no son únicos}. Si $(s,t)$ funciona, también funciona $(s+kb/g,\ t-ka/g)$. Las dos versiones dan el mismo inverso: $34$ y $-55\equiv34\md{89}$.
+\end{ejemplo}
+
+\textbf{Método 2: tabla con recurrencia.} Se arranca con $s_0=1,t_0=0$ (la fila de $a$) y $s_1=0,t_1=1$ (la fila de $b$), y en cada paso
+\[
+r_j=r_{j-2}-q_{j-1}r_{j-1},\qquad s_j=s_{j-2}-q_{j-1}s_{j-1},\qquad t_j=t_{j-2}-q_{j-1}t_{j-1}.
+\]
+\emph{Por qué funciona:} se mantiene el invariante $r_j=s_ja+t_jb$ en cada fila. Las dos primeras filas lo cumplen ($a=1a+0b$, $b=0a+1b$), y si dos filas lo cumplen, su combinación ``fila$_{j-2}-q\cdot$fila$_{j-1}$'' también lo cumple, porque todo es lineal.
+
+\begin{center}
+\begin{tabular}{cccccc}
+\toprule
+$j$ & $r_j$ & $q_j$ & $s_j$ & $t_j$ & comprobación $s_j\cdot89+t_j\cdot55$\\
+\midrule
+0 & 89 & -- & 1 & 0 & 89\\
+1 & 55 & 1 & 0 & 1 & 55\\
+2 & 34 & 1 & 1 & $-1$ & 34\\
+3 & 21 & 1 & $-1$ & 2 & 21\\
+4 & 13 & 1 & 2 & $-3$ & 13\\
+5 & 8 & 1 & $-3$ & 5 & 8\\
+6 & 5 & 1 & 5 & $-8$ & 5\\
+7 & 3 & 1 & $-8$ & 13 & 3\\
+8 & 2 & 2 & 13 & $-21$ & 2\\
+9 & \textbf{1} & -- & $\mathbf{-21}$ & $\mathbf{34}$ & 1\\
+\bottomrule
+\end{tabular}
+\end{center}
+(La columna $q_j$ es el cociente que se usa para construir la fila siguiente.)
+
+\subsection{Inversos modulares}
+
+\begin{definicion}
+$\bar a$ es un \textbf{inverso de $a$ módulo $m$} si $a\bar a\equiv 1\md m$.
+\end{definicion}
+
+\begin{teorema}
+$a$ tiene inverso módulo $m$ $\iff$ $\mcd(a,m)=1$. En ese caso el inverso es único módulo $m$.
+\end{teorema}
+\begin{proof}
+$a\bar a\equiv1\md m\iff m\mid a\bar a-1\iff a\bar a-1=mk\iff \bar a\, a+(-k)m=1$ para algún $k$. Por el criterio de coprimalidad, eso pasa si y solo si $\mcd(a,m)=1$.
+
+Unicidad: si $a\bar a\equiv a\bar a'\equiv1$, entonces $\bar a=\bar a(a\bar a')=(\bar a a)\bar a'\equiv\bar a'$.
+\end{proof}
+
+\textbf{Cálculo:} con Euclides extendido se obtiene $sa+tm=1$. Al reducir módulo $m$ el término $tm$ desaparece, así que $\bar a\equiv s\md m$.
+
+\begin{ejemplo}
+De $34\cdot55-21\cdot89=1$, módulo 89: $34\cdot55\equiv1$. Entonces $55^{-1}\equiv34\md{89}$.
+\end{ejemplo}
+
+\begin{contra}
+$2$ no tiene inverso módulo $6$. La fila del 2 en la tabla de multiplicar mod 6 es $0,2,4,0,2,4$, y el 1 nunca aparece. Esto pasa porque $2x-1$ es impar y $6x'$ es par.
+\end{contra}
+
+\begin{regla}
+¿Existe $a^{-1}\bmod m$? Calcula $\mcd(a,m)$. Si da 1, lee el coeficiente de $a$ en Bézout y redúcelo módulo $m$.
+\end{regla}
+
+\subsection*{Ejercicios del Módulo 2}
+\begin{enumerate}[label=\textbf{2.\arabic*}]
+\item Escribe $18=\mcd(252,198)$ como combinación lineal.\\
+\emph{Sol.} $18=54-36=54-(198-3\cdot54)=4\cdot54-198=4(252-198)-198=4\cdot252-5\cdot198$.
+\item Halla $17^{-1}\bmod 60$.\\
+\emph{Sol.} $60=3\cdot17+9$, $17=1\cdot9+8$, $9=1\cdot8+1$. Hacia atrás: $1=9-8=9-(17-9)=2\cdot9-17=2(60-3\cdot17)-17=2\cdot60-7\cdot17$. Entonces $17^{-1}\equiv-7\equiv53$. Comprobación: $17\cdot53=901=15\cdot60+1$.
+\item Prueba que si $\mcd(a,b)=1$ entonces $\mcd(a+b,b)=1$.\\
+\emph{Sol.} $sa+tb=1\Rightarrow s(a+b)+(t-s)b=1$.
+\item ¿Tiene $15$ inverso módulo $42$? \emph{Sol.} No, porque $\mcd(15,42)=3\neq1$.
+\end{enumerate}
+
+\newpage
+%======================================================================
+\section{Módulo 3: Congruencias, TCR, Fermat y Wilson}
+%======================================================================
+
+\subsection{La relación de congruencia}
+
+\begin{definicion}
+$a\equiv b\md m\iff m\mid(a-b)\iff a\bmod m=b\bmod m$.
+\end{definicion}
+
+\begin{intuicion}
+Es aritmética de reloj: en un reloj de $m$ horas, $a$ y $b$ marcan la misma hora. Visualmente, enrolla la recta numérica en un resorte con $m$ posiciones por vuelta. Los números que quedan uno encima de otro son congruentes, y cada ``columna'' del resorte es una \textbf{clase} $[r]_m=\{r+km : k\in\Z\}$.
+\end{intuicion}
+
+\begin{teorema}
+$\equiv\md m$ es una relación de equivalencia y parte a $\Z$ en exactamente $m$ clases $[0],[1],\dots,[m-1]$.
+\end{teorema}
+\begin{proof}
+\emph{Reflexiva:} $m\mid 0$. \emph{Simétrica:} $m\mid a-b\Rightarrow m\mid b-a$. \emph{Transitiva:} $m\mid a-b$ y $m\mid b-c\Rightarrow m\mid(a-b)+(b-c)=a-c$. Hay $m$ clases porque, por el algoritmo de la división, cada entero tiene un único residuo en $\{0,\dots,m-1\}$.
+\end{proof}
+
+\subsection{Álgebra de congruencias}
+
+\begin{teorema}
+Si $a\equiv b$ y $c\equiv d\md m$, entonces $a+c\equiv b+d$, $ac\equiv bd$, $a^k\equiv b^k$ y $P(a)\equiv P(b)$ para todo polinomio $P$ con coeficientes enteros.
+\end{teorema}
+\begin{proof}
+La suma: $(a+c)-(b+d)=(a-b)+(c-d)$. El producto, con el truco de \emph{sumar y restar}: $ac-bd=ac-bc+bc-bd=c(a-b)+b(c-d)$, y $m$ divide a ambos sumandos. Las potencias salen por inducción usando el producto, y los polinomios combinando sumas y productos.
+\end{proof}
+
+\textbf{Consecuencia práctica:} se puede reducir módulo $m$ \emph{en cualquier momento} de una cuenta con sumas, productos y potencias. Por ejemplo, $27\equiv 9\cdot3\equiv 4\cdot 3=12\equiv 2\md 5$.
+
+\begin{pregunta}
+Sumar, multiplicar y elevar a potencias se puede hacer siempre. ¿Y \emph{dividir}?
+\end{pregunta}
+
+\begin{teorema}[Cancelación]
+$ac\equiv bc\md m\ \Longrightarrow\ a\equiv b\md{\dfrac{m}{\mcd(c,m)}}$. En particular, si $\mcd(c,m)=1$ se cancela sin cambiar el módulo.
+\end{teorema}
+\begin{proof}
+Sea $g=\mcd(c,m)$, con $c=gc'$, $m=gm'$ y $\mcd(c',m')=1$. Tenemos $m\mid c(a-b)$, es decir, $gm'\mid gc'(a-b)$, luego $m'\mid c'(a-b)$. Como $\mcd(m',c')=1$, por el lema de divisibilidad coprima $m'\mid a-b$.
+\end{proof}
+
+\begin{trampa}
+$4x\equiv4y\md 6$ \textbf{no} implica $x\equiv y\md6$. Contraejemplo: $x=0$, $y=3$. Se cumple $0\equiv12\md 6$ pero $0\not\equiv3\md6$. Lo correcto es $x\equiv y\md 3$, porque $6/\mcd(4,6)=3$.
+\end{trampa}
+
+\subsection{Congruencias lineales $ax\equiv b\md m$}
+
+\begin{teorema}
+Sea $d=\mcd(a,m)$. La congruencia $ax\equiv b\md m$ tiene solución $\iff d\mid b$. En ese caso tiene \textbf{exactamente $d$} soluciones incongruentes módulo $m$:
+\[
+x\equiv x_0+k\cdot\tfrac{m}{d}\md m,\qquad k=0,1,\dots,d-1,
+\]
+donde $x_0$ es la solución de $\tfrac ad x\equiv\tfrac bd\md{\tfrac md}$.
+\end{teorema}
+\begin{proof}
+\emph{Necesidad:} si $ax-b=mk$, entonces $b=ax-mk$, y $d$ divide a $a$ y a $m$, así que $d\mid b$.
+
+\emph{Suficiencia:} si $d\mid b$, se divide todo entre $d$: $a'x\equiv b'\md{m'}$ con $a'=a/d$, $b'=b/d$, $m'=m/d$ y $\mcd(a',m')=1$. Entonces $a'$ tiene inverso y $x_0\equiv (a')^{-1}b'\md{m'}$. Las soluciones módulo $m'$ son $x_0+km'$. Módulo $m=dm'$, los valores $k=0,\dots,d-1$ dan residuos distintos (están separados por menos de $m$), y $k=d$ ya vuelve a $x_0$.
+\end{proof}
+
+\begin{intuicion}
+Si $d>1$, la ``órbita'' $\{ax \bmod m\}$ solo pasa por los múltiplos de $d$ y pasa $d$ veces por cada uno. Si $b$ no es múltiplo de $d$, nunca se llega a él. Si lo es, se llega $d$ veces.
+\end{intuicion}
+
+\begin{ejemplo}[$55x\equiv13\md{89}$]
+$\mcd(55,89)=1$, así que hay una única solución. Se multiplica por $55^{-1}\equiv34$: $x\equiv13\cdot34=442=4\cdot89+86$, luego $x\equiv86\md{89}$. Comprobación: $55\cdot86=4730=53\cdot89+13$.
+\end{ejemplo}
+
+\begin{ejemplo}[Con $d>1$: $6x\equiv9\md{15}$]
+$d=\mcd(6,15)=3$ y $3\mid9$, así que hay 3 soluciones. Dividiendo entre 3: $2x\equiv3\md5$. Como $2^{-1}\equiv3\md 5$, $x_0\equiv9\equiv4\md5$. Las soluciones módulo 15 son $4,\,9,\,14$. Comprobación: $24,54,84$ dejan residuo $9$ al dividir entre $15$.
+\end{ejemplo}
+
+\subsection{El Teorema Chino del Residuo}
+
+\begin{pregunta}
+Si conozco el residuo de $x$ módulo $3$ y módulo $5$, ¿conozco $x$ módulo $15$?
+\end{pregunta}
+
+\begin{intuicion}
+Pon los números $0,\dots,14$ en una rejilla de $3\times5$, cada uno en la fila $x\bmod3$ y la columna $x\bmod 5$. Al avanzar de uno en uno se baja una fila y se corre una columna, en diagonal y dando la vuelta por los bordes. Como $3$ y $5$ son coprimos, la diagonal \emph{recorre las 15 casillas sin repetir}. Así que cada par (residuo mod 3, residuo mod 5) corresponde a exactamente un número módulo 15. Con $2\times4$ (no coprimos) la diagonal se cierra después de solo $\mcm(2,4)=4$ pasos y deja casillas vacías: hay sistemas sin solución. Esta rejilla es la animación central del módulo 3.
+\end{intuicion}
+
+\begin{teorema}[TCR]
+Si $m_1,\dots,m_n$ son coprimos dos a dos, el sistema $x\equiv a_i\md{m_i}$ ($i=1,\dots,n$) tiene solución única módulo $M=m_1\cdots m_n$.
+\end{teorema}
+
+\begin{proof}
+\emph{Existencia (construcción).} Sea $M_i=M/m_i$. Como $M_i$ es producto de módulos coprimos con $m_i$, se tiene $\mcd(M_i,m_i)=1$ (por el lema del mcd con un producto, aplicado varias veces). Entonces existe $y_i=M_i^{-1}\bmod m_i$. Sea
+\[ x=\sum_{i=1}^n a_iM_iy_i. \]
+Módulo $m_j$: si $i\ne j$, $m_j\mid M_i$ y ese término es $\equiv0$. El término $j$ da $a_jM_jy_j\equiv a_j\cdot1$. Así que $x\equiv a_j\md{m_j}$ para todo $j$.
+
+\emph{Unicidad.} Si $x$ y $x'$ son soluciones, $m_i\mid x-x'$ para todo $i$. Por la división múltiple coprima, aplicada repetidamente, $M\mid x-x'$.
+\end{proof}
+
+\begin{intuicion}
+Cada término $C_i=M_iy_i$ es un ``interruptor'': vale $1$ módulo $m_i$ y $0$ módulo todos los demás. La solución es la suma de los residuos, cada uno multiplicado por su interruptor.
+\end{intuicion}
+
+\begin{ejemplo}[Por sustitución]
+$x\equiv5\md{55}$, $x\equiv10\md{89}$. De la primera ecuación, $x=55k+5$. En la segunda, $55k\equiv5\md{89}$, así que $k\equiv5\cdot34=170\equiv81\md{89}$. Con $k=89q+81$: $x=55(89q+81)+5=4895q+4460$. Entonces $x\equiv4460\md{4895}$.
+\end{ejemplo}
+
+\begin{ejemplo}[Con la fórmula]
+$2x\equiv1\md5$, $x\equiv-1\md7$, $x\equiv4\md9$, $3x\equiv2\md{11}$. \textbf{Primero se despeja cada $x$:} $2^{-1}\equiv3\md 5$, así que $x\equiv3$. $-1\equiv6\md7$. $3^{-1}\equiv4\md{11}$, así que $x\equiv8$. El sistema queda $x\equiv3,6,4,8$ módulo $5,7,9,11$, con $M=3465$:
+\begin{center}
+\begin{tabular}{ccccc}
+\toprule
+$m_i$ & $a_i$ & $M_i$ & $M_i\bmod m_i$ & $y_i=M_i^{-1}$\\
+\midrule
+5 & 3 & 693 & 3 & 2\\
+7 & 6 & 495 & 5 & 3\\
+9 & 4 & 385 & 7 & 4\\
+11 & 8 & 315 & 7 & 8\\
+\bottomrule
+\end{tabular}
+\end{center}
+$x\equiv3\cdot693\cdot2+6\cdot495\cdot3+4\cdot385\cdot4+8\cdot315\cdot8=4158+8910+6160+20160=39388\equiv1273\md{3465}$.
+Comprobación: $1273=5\cdot254+3=7\cdot181+6=9\cdot141+4=11\cdot115+8$.
+\end{ejemplo}
+
+\begin{ejemplo}[Módulos que \emph{no} son coprimos]
+Cuando los módulos comparten factores, \textbf{se descompone cada ecuación en potencias de primos} (esto es el TCR usado al revés):
+\begin{itemize}
+\item $\{x\equiv7\md{10},\ x\equiv4\md{35}\}$ da $x\equiv1\md2$, $x\equiv2\md5$, $x\equiv4\md5$, $x\equiv4\md7$. Hay dos condiciones contradictorias módulo 5, así que \textbf{no hay solución}.
+\item $\{x\equiv7\md{10},\ x\equiv2\md{35}\}$ da $x\equiv1\md2$, $x\equiv2\md5$ (que aparece dos veces, sin conflicto) y $x\equiv2\md7$. Con TCR y $M=70$: $C_1=35\cdot1$, $C_2=14\cdot4=56$, $C_3=10\cdot5=50$. Entonces $x\equiv35+2\cdot56+2\cdot50=247\equiv37\md{70}$.
+\end{itemize}
+Regla general: $x\equiv a\md m$, $x\equiv b\md n$ tiene solución $\iff\mcd(m,n)\mid a-b$, y es única módulo $\mcm(m,n)$, no módulo $mn$.
+\end{ejemplo}
+
+\begin{esqueleto}
+\textbf{TCR:} (1) $\mcd(M_i,m_i)=1$, así que $y_i$ existe; (2) $C_i\equiv1\md{m_i}$ y $C_i\equiv0$ en los demás módulos; (3) se suma $\sum a_iC_i$; (4) la unicidad sale de que si todos los $m_i$ dividen a $x-x'$, entonces su producto también.
+\end{esqueleto}
+
+\subsection{Pequeño Teorema de Fermat}
+
+\begin{pregunta}
+¿Cómo se calcula $2^{1000005}\bmod101$ sin hacer un millón de multiplicaciones?
+\end{pregunta}
+
+\begin{teorema}[PTF]
+Si $p$ es primo y $p\nmid a$, entonces $a^{p-1}\equiv1\md p$. Para todo $a\in\Z$, $a^p\equiv a\md p$.
+\end{teorema}
+
+\begin{intuicion}
+Multiplicar por $a$ \emph{revuelve} los residuos $1,2,\dots,p-1$ sin repetir ni perder ninguno. Con $p=7$ y $a=3$: $3,6,2,5,1,4$ son los mismos seis números en otro orden. Si se multiplican todos, el producto es el mismo antes y después de revolver, pero después de revolver hay un factor $a^{p-1}$ de más.
+\end{intuicion}
+
+\begin{proof}
+Considera $a,2a,\dots,(p-1)a$ módulo $p$.
+\begin{itemize}
+\item Ninguno es $\equiv0$: si $p\mid ka$ con $p\nmid a$, por el lema de Euclides $p\mid k$, lo cual es imposible porque $1\le k\le p-1$.
+\item Son distintos: si $ia\equiv ja$, se cancela $a$ (porque $\mcd(a,p)=1$) y queda $i\equiv j$.
+\end{itemize}
+Son $p-1$ residuos distintos y no nulos, así que son $1,\dots,p-1$ en algún orden. Multiplicando todo:
+\[
+a^{p-1}(p-1)!\equiv(p-1)!\md p.
+\]
+Como $\mcd((p-1)!,p)=1$, se cancela y queda $a^{p-1}\equiv1$. Para la segunda forma: si $p\nmid a$ se multiplica por $a$, y si $p\mid a$ ambos lados son $\equiv0$.
+\end{proof}
+
+\textbf{Estrategia para exponentes gigantes.} Se divide el exponente entre $p-1$: $E=q(p-1)+r$, y entonces $a^E=(a^{p-1})^q a^r\equiv a^r\md p$. \emph{El exponente vive módulo $p-1$.}
+
+\begin{ejemplo}
+$2^{1000005}\bmod101$. Como $101$ es primo y $101\nmid2$, $2^{100}\equiv1$. Además $1000005=100\cdot10000+5$, así que $2^{1000005}\equiv2^5=32\md{101}$.
+\end{ejemplo}
+
+\begin{ejemplo}[Inverso por Fermat]
+$7^{22}\equiv1\md{23}$, así que $7\cdot7^{21}\equiv1$ y $7^{-1}\equiv7^{21}$. Por cuadrados sucesivos: $7^2=49\equiv3$, $7^4\equiv9$, $7^8\equiv81\equiv12$, $7^{16}\equiv144\equiv6$. Como $21=16+4+1$: $7^{21}\equiv6\cdot9\cdot7=378=16\cdot23+10\equiv10$. Comprobación: $7\cdot10=70=3\cdot23+1$.
+\end{ejemplo}
+
+\begin{trampa}
+Fermat \textbf{solo} vale con módulo primo. Para $a^{12}\bmod15$ no sirve el exponente $14$. Se usa Euler ($\varphi(15)=8$) o el TCR con los módulos 3 y 5.
+\end{trampa}
+
+\begin{contra}
+La recíproca es falsa: $2^{340}\equiv1\md{341}$ y $341=11\cdot31$ no es primo (es un pseudoprimo). Que se cumpla $a^{n-1}\equiv1$ no prueba que $n$ sea primo.
+\end{contra}
+
+\subsection{Teorema de Wilson}
+
+\begin{teorema}[Wilson]
+$n>1$ es primo $\iff (n-1)!\equiv-1\md n$.
+\end{teorema}
+
+\begin{intuicion}
+En $\{1,\dots,p-1\}$ cada número tiene un inverso y casi todos se emparejan con \emph{otro} número: el par $a\cdot a^{-1}=1$ se cancela del producto. Los únicos que son su propio inverso son las soluciones de $a^2\equiv1$, es decir, $1$ y $p-1$ (ver Módulo 4). Así que el producto entero es $1\cdot(p-1)\equiv-1$. Con $p=7$: $6!=1\cdot(2\cdot4)(3\cdot5)\cdot6\equiv1\cdot1\cdot1\cdot6\equiv-1$.
+\end{intuicion}
+
+\begin{proof}
+($\Rightarrow$) Para $p=2$: $1!\equiv-1\md2$. Para $p$ impar: cada $a\in\{2,\dots,p-2\}$ tiene inverso $a^{-1}\ne a$, porque $a^2\equiv1\iff p\mid(a-1)(a+1)\iff a\equiv\pm1$ por el lema de Euclides. Así que $\{2,\dots,p-2\}$ se parte en parejas cuyo producto es $1$, y entonces $(p-1)!\equiv1\cdot1\cdots1\cdot(p-1)\equiv-1$.
+
+($\Leftarrow$) Si $n=ab$ con $1<a<n$, entonces $a\mid(n-1)!$. Si $(n-1)!\equiv-1\md n$, como $a\mid n$ también $(n-1)!\equiv-1\md a$, y entonces $a\mid 1$. Contradicción.
+\end{proof}
+
+\begin{ejemplo}
+Con $p=101$: $100!\equiv-1\equiv100$. Como $100!=100\cdot99!$ y $100\equiv-1$: $-99!\equiv-1$, así que $99!\equiv1$. Como $99!=99\cdot98!$ y $99\equiv-2$: $-2\cdot98!\equiv1$, es decir, $2\cdot98!\equiv-1\equiv100$, y entonces $98!\equiv50\md{101}$. Comprobación: $2\cdot50=100\equiv-1$.
+\end{ejemplo}
+
+\begin{regla}
+¿Factorial módulo un primo $p$? Wilson para $(p-1)!$, y después se van ``quitando'' factores escribiéndolos como $-1,-2,\dots$
+\end{regla}
+
+\subsection*{Ejercicios del Módulo 3}
+\begin{enumerate}[label=\textbf{3.\arabic*}]
+\item Resuelve $8x\equiv12\md{20}$.\\
+\emph{Sol.} $d=4\mid12$, así que hay 4 soluciones. Dividiendo: $2x\equiv3\md5$, luego $x\equiv4\md5$. Las soluciones son $4,9,14,19\md{20}$.
+\item Resuelve $x\equiv2\md3$, $x\equiv3\md5$, $x\equiv2\md7$.\\
+\emph{Sol.} $M=105$. $C_1=35\cdot(35^{-1}\bmod3)=35\cdot2=70$, $C_2=21\cdot(21^{-1}\bmod5)=21\cdot1=21$, $C_3=15\cdot(15^{-1}\bmod7)=15\cdot1=15$. Entonces $x\equiv140+63+30=233\equiv23\md{105}$.
+\item Calcula $3^{100}\bmod7$.\\
+\emph{Sol.} $3^6\equiv1$ y $100=6\cdot16+4$, así que $3^{100}\equiv3^4=81\equiv4$.
+\item Calcula $15!\bmod17$.\\
+\emph{Sol.} $16!\equiv-1$ y $16\equiv-1$, así que $-15!\equiv-1$ y $15!\equiv1$.
+\item ¿Tiene solución $\{x\equiv3\md6,\ x\equiv5\md{8}\}$?\\
+\emph{Sol.} $\mcd(6,8)=2\mid5-3=2$, así que sí. Las soluciones son los impares $\equiv3\md6$ y $\equiv5\md 8$: $x\equiv21\md{24}$.
+\end{enumerate}
+
+\newpage
+%======================================================================
+\section{Módulo 4: Función $\varphi$ de Euler, Teorema de Euler y RSA}
+%======================================================================
+
+\subsection{La función $\varphi$}
+
+\begin{definicion}
+$\varphi(n)=\big|\{x : 1\le x\le n,\ \mcd(x,n)=1\}\big|$, es decir, cuántos residuos tienen inverso módulo $n$.
+\end{definicion}
+
+\begin{teorema}[Fórmulas]
+\begin{enumerate}
+\item $\varphi(p)=p-1$ si $p$ es primo.
+\item $\varphi(p^k)=p^k-p^{k-1}=p^k\left(1-\tfrac1p\right)$.
+\item Si $\mcd(m,n)=1$: $\varphi(mn)=\varphi(m)\varphi(n)$.
+\item Si $n=p_1^{a_1}\cdots p_k^{a_k}$: $\varphi(n)=n\prod_{i}\left(1-\tfrac1{p_i}\right)$.
+\end{enumerate}
+\end{teorema}
+\begin{proof}
+(1) Todos los números de $1$ a $p-1$ son coprimos con $p$.
+(2) $\mcd(x,p^k)\ne1\iff p\mid x$. Entre $1$ y $p^k$ hay $p^{k-1}$ múltiplos de $p$, que son los que se restan.
+(3) Por el TCR, $x\bmod mn\leftrightarrow(x\bmod m,\,x\bmod n)$ es una biyección. Además $\mcd(x,mn)=1\iff\mcd(x,m)=1$ y $\mcd(x,n)=1$. Así que los residuos invertibles módulo $mn$ corresponden a las parejas (invertible mod $m$, invertible mod $n$), y de esas hay $\varphi(m)\varphi(n)$. En la rejilla del TCR son las casillas que están en una fila ``buena'' y en una columna ``buena'' a la vez.
+(4) Combinando (2) y (3).
+\end{proof}
+
+\begin{ejemplo}
+$\varphi(119)=\varphi(7)\varphi(17)=6\cdot16=96$. $\varphi(1000)=\varphi(2^3)\varphi(5^3)=4\cdot100=400$. $\varphi(360)=360\cdot\frac12\cdot\frac23\cdot\frac45=96$.
+\end{ejemplo}
+
+\begin{trampa}
+$\varphi(mn)=\varphi(m)\varphi(n)$ \textbf{solo} si son coprimos: $\varphi(4)=2\ne\varphi(2)^2=1$.
+\end{trampa}
+
+\subsection{Teorema de Euler}
+
+\begin{teorema}[Euler]
+Si $\mcd(a,n)=1$, entonces $a^{\varphi(n)}\equiv1\md n$.
+\end{teorema}
+\begin{proof}
+Es la misma prueba de Fermat, pero solo con los residuos invertibles. Sean $r_1,\dots,r_{\varphi(n)}$ los residuos coprimos con $n$. Los productos $ar_1,\dots,ar_{\varphi(n)}$ siguen siendo coprimos con $n$ (por el lema del mcd con un producto) y son distintos (se puede cancelar $a$). Así que son los mismos $r_i$ en otro orden. Multiplicando todo: $a^{\varphi(n)}\prod r_i\equiv\prod r_i$, y se cancela $\prod r_i$, que es invertible. Fermat es el caso $n=p$.
+\end{proof}
+
+\textbf{Estrategia:} el exponente se reduce módulo $\varphi(n)$.
+
+\begin{ejemplo}[$2^{118}\bmod119$]
+$\varphi(119)=96$ y $\mcd(2,119)=1$, así que $2^{118}=2^{96}\cdot2^{22}\equiv2^{22}$. Por otro lado, $2^7=128\equiv9$, $2^{11}=2^7\cdot2^4\equiv9\cdot16=144\equiv25$ y $2^{22}=(2^{11})^2\equiv625=5\cdot119+30\equiv30$. El residuo es $\mathbf{30}$.
+\end{ejemplo}
+
+\begin{ejemplo}[Últimas tres cifras de $7^{2407}$]
+Las últimas tres cifras son el residuo módulo 1000. $\varphi(1000)=400$ y $2407=6\cdot400+7$, así que $7^{2407}\equiv7^7$. Además $7^4=2401\equiv401$ y $7^3=343$, así que $7^7\equiv401\cdot343=137543\equiv543$. Las últimas tres cifras son $\mathbf{543}$.
+\end{ejemplo}
+
+\subsection{Elementos autoinversos: $a^2\equiv1$}
+
+\begin{pregunta}
+¿Cuántos residuos son su propio inverso? En los reales solo hay dos, $\pm1$. ¿Pasa lo mismo módulo $n$?
+\end{pregunta}
+
+\begin{teorema}
+\begin{enumerate}
+\item Si $p$ es primo impar, $a^2\equiv1\md{p^k}$ tiene exactamente 2 soluciones, $\pm1$. (Arriba se probó para $p$. Para $p^k$ el argumento es el mismo, porque $p$ no puede dividir a la vez a $a-1$ y a $a+1$, ya que su diferencia es 2.)
+\item $a^2\equiv1\md{2^n}$ tiene 1 solución si $n=1$, 2 si $n=2$ y \textbf{4} si $n\ge3$: $\pm1$ y $2^{n-1}\pm1$.
+\item Para $n$ general, por el TCR, el número de soluciones es el producto de los números de soluciones de cada potencia de primo.
+\end{enumerate}
+\end{teorema}
+
+\begin{proof}
+(1) $p\mid(a-1)(a+1)$. Por el lema de Euclides, $p\mid a-1$ o $p\mid a+1$. Así $a\equiv\pm1$, y son distintos porque $p\ne2$.
+
+(2) Con $n\ge3$: $a$ tiene que ser impar, así que $a-1$ y $a+1$ son pares consecutivos. Por el lema $\mcd(x,y)=\mcd(x,y-x)$: $\mcd(a-1,a+1)=\mcd(a-1,2)=2$. Entonces solo uno de los dos factores puede tener más de un factor 2, y como el producto necesita al menos $n$ factores 2, uno de ellos debe ser divisible por $2^{n-1}$:
+\begin{itemize}
+\item $2^{n-1}\mid a-1$: $a\equiv1$ o $a\equiv2^{n-1}+1\md{2^n}$.
+\item $2^{n-1}\mid a+1$: $a\equiv2^{n-1}-1$ o $a\equiv-1\md{2^n}$.
+\end{itemize}
+Para $n\ge3$ los cuatro valores son distintos, y los cuatro cumplen: $(2^{n-1}\pm1)^2=2^{2n-2}\pm2^n+1\equiv1$, porque $2n-2\ge n$.
+\end{proof}
+
+\begin{ejemplo}[Módulo 100]
+$100=4\cdot25$. Módulo 4: $a\equiv1,3$. Módulo 25: $a\equiv\pm1$. Hay $2\cdot2=4$ soluciones: $\{1,49,51,99\}$. \textbf{Producto de los 40 residuos coprimos con 100:} cada uno que no es su propio inverso se cancela con su pareja, y quedan $1\cdot49\cdot51\cdot99\equiv1\cdot(-51)\cdot51\cdot(-1)=51^2=2601\equiv1\md{100}$. Esto generaliza Wilson: el producto de los invertibles es $-1$ solo cuando hay exactamente dos autoinversos.
+\end{ejemplo}
+
+\begin{ejemplo}[Módulo 3600]
+$3600=2^4\cdot3^2\cdot5^2$. Módulo 16: $\{1,7,9,15\}$. Módulo 9: $\{1,8\}$. Módulo 25: $\{1,24\}$. Total: $4\cdot2\cdot2=16$. Con $C_1=225\cdot1$, $C_2=400\cdot7=2800$ y $C_3=144\cdot4=576$, $a\equiv225r_1+2800r_2+576r_3\md{3600}$ da:
+\[\{1,199,449,649,1151,1351,1601,1799,1801,1999,2249,2449,2951,3151,3401,3599\}.\]
+(Verificado por búsqueda exhaustiva: son exactamente los $a<3600$ con $a^2\equiv1$.)
+\end{ejemplo}
+
+\subsection{RSA}
+
+\begin{pregunta}
+¿Cómo puede cualquier persona cifrarme un mensaje con una clave pública, sin que nadie más que yo pueda descifrarlo?
+\end{pregunta}
+
+\textbf{Generación de claves.}
+\begin{enumerate}
+\item Se eligen primos $p,q$. Se calcula $n=pq$ y $\varphi(n)=(p-1)(q-1)$.
+\item Se elige $e$ con $1<e<\varphi(n)$ y $\mcd(e,\varphi(n))=1$.
+\item Se calcula $d\equiv e^{-1}\md{\varphi(n)}$ con Euclides extendido.
+\item La clave pública es $(n,e)$. La clave privada es $d$, y $p$, $q$ y $\varphi(n)$ se mantienen en secreto.
+\end{enumerate}
+\textbf{Cifrar:} $C=M^e\bmod n$. \textbf{Descifrar:} $M=C^d\bmod n$.
+
+\begin{teorema}[Por qué funciona]
+Si $0\le M<n$, entonces $(M^e)^d\equiv M\md n$.
+\end{teorema}
+\begin{proof}
+$ed=1+k\varphi(n)=1+k(p-1)(q-1)$. Veamos que $M^{ed}\equiv M\md p$. Si $p\mid M$, ambos lados son $0$. Si no, por Fermat $M^{ed}=M\cdot(M^{p-1})^{k(q-1)}\equiv M$. Lo mismo módulo $q$. Como $\mcd(p,q)=1$, por el TCR (unicidad) $M^{ed}\equiv M\md{pq}$.
+\end{proof}
+
+\begin{ejemplo}[RSA completo con números pequeños]
+$p=5$, $q=11$, así que $n=55$ y $\varphi(n)=40$. Se toma $e=3$, con $\mcd(3,40)=1$. Como $40=13\cdot3+1$, $1=40-13\cdot3$ y $d\equiv-13\equiv27\md{40}$. Comprobación: $3\cdot27=81=2\cdot40+1$.
+
+Cifrar $M=7$: $C=7^3=343=6\cdot55+13$, así que $C=13$.
+
+Descifrar $13^{27}\bmod55$ con el TCR. Módulo 5: $13\equiv3$, y $3^{27}=3^{4\cdot6+3}\equiv3^3=27\equiv2$. Módulo 11: $13\equiv2$, y $2^{27}=2^{10\cdot2+7}\equiv2^7=128\equiv7$. Se busca $x\equiv2\md5$, $x\equiv7\md{11}$, y la solución es $x=7$. Se recupera $M=7$.
+\end{ejemplo}
+
+\begin{trampa}
+$d$ es el inverso de $e$ \textbf{módulo $\varphi(n)$, no módulo $n$}. La razón es que los exponentes ``viven'' módulo $\varphi(n)$ (Euler), mientras que las bases viven módulo $n$.
+\end{trampa}
+
+\begin{regla}
+Para elegir teorema: ¿el módulo es primo? Fermat (exponente mod $p-1$). ¿No es primo pero $\mcd(a,n)=1$? Euler (exponente mod $\varphi(n)$). ¿Se puede factorizar el módulo? TCR y resolver por partes. ¿Hay un factorial módulo un primo? Wilson.
+\end{regla}
+
+\subsection*{Ejercicios del Módulo 4}
+\begin{enumerate}[label=\textbf{4.\arabic*}]
+\item Calcula las dos últimas cifras de $3^{2026}$.\\
+\emph{Sol.} $\varphi(100)=40$ y $2026\equiv26\md{40}$. $3^{5}=243\equiv43$, $3^{10}\equiv43^2=1849\equiv49$, $3^{20}\equiv49^2=2401\equiv1$. Entonces $3^{26}=3^{20}\cdot3^5\cdot3\equiv1\cdot43\cdot3=129\equiv29$. Las dos últimas cifras son $\mathbf{29}$.
+\item Halla todos los $a$ con $a^2\equiv1\md{15}$.\\
+\emph{Sol.} Módulo 3: $\pm1$. Módulo 5: $\pm1$. Las cuatro combinaciones dan $\{1,4,11,14\}$.
+\item En RSA con $p=5$, $q=11$ y $e=3$, alguien calcula $d$ como $3^{-1}\bmod55=37$. ¿Funciona?\\
+\emph{Sol.} No en general: $13^{37}\bmod55=18\neq7$. La razón es que $3\cdot37=111\equiv31\md{40}$, que no es $1$.
+\item Calcula $\varphi(2^5\cdot 7^2)$.\\
+\emph{Sol.} $\varphi(32)\varphi(49)=16\cdot42=672$.
+\end{enumerate}
+
+\newpage
+%======================================================================
+\section{Mapa de decisión y errores comunes}
+%======================================================================
+
+\begin{center}
+\renewcommand{\arraystretch}{1.35}
+\begin{tabular}{p{6.3cm}p{8.3cm}}
+\toprule
+\textbf{Si el problema pide\dots} & \textbf{usa\dots}\\
+\midrule
+$\mcd(a,b)$ con números grandes & Euclides (último residuo no nulo)\\
+$s,t$ con $sa+tb=\mcd$ & Euclides extendido (hacia atrás o tabla)\\
+$a^{-1}\bmod m$ & comprobar $\mcd=1$ y luego Bézout. Si $m$ es primo, también $a^{m-2}$\\
+$ax\equiv b\md m$ & $d=\mcd(a,m)$; si $d\mid b$, dividir entre $d$ y hay $d$ soluciones\\
+Varias congruencias, módulos coprimos & TCR (fórmula o sustitución)\\
+Varias congruencias, módulos no coprimos & descomponer en potencias de primos y buscar choques\\
+$a^E\bmod p$, $p$ primo & Fermat: $E\bmod(p-1)$\\
+$a^E\bmod n$, $\mcd(a,n)=1$ & Euler: $E\bmod\varphi(n)$\\
+$a^E\bmod n$, $n$ compuesto & también TCR con los factores de $n$\\
+$k!\bmod p$ & Wilson y quitar factores ($p-1\equiv-1$, \dots)\\
+Últimas $k$ cifras & módulo $10^k$ con Euler, $\varphi(10^k)=4\cdot10^{k-1}$\\
+Probar $d\mid c$ con coprimalidad & plantilla de Bézout: $sa+tb=1$, multiplicar por $c$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{Los errores comunes, todos juntos}
+\begin{enumerate}
+\item Residuo negativo en el algoritmo de la división: $r$ siempre cumple $0\le r<d$.
+\item $sa+tb=g$ no implica $g=\mcd$, salvo cuando $g=1$.
+\item Cancelar sin revisar el MCD: $ac\equiv bc\md m$ da $a\equiv b\md{m/\mcd(c,m)}$.
+\item Fermat con módulo compuesto.
+\item TCR con módulos no coprimos: puede no haber solución, y si la hay es única módulo el $\mcm$.
+\item $\varphi(mn)=\varphi(m)\varphi(n)$ sin coprimalidad.
+\item En RSA, $d=e^{-1}$ módulo $\varphi(n)$, no módulo $n$.
+\item En $ax\equiv b$, olvidar que hay $d$ soluciones módulo $m$ y no una sola.
+\item Pensar que $p_1\cdots p_k+1$ es primo.
+\end{enumerate}
+
+\end{document}
