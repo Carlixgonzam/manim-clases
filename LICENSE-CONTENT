@@ -1,0 +1,19 @@
+manim-clases videos and guides
+Copyright (c) 2026 Carla González Mina
+
+The videos (the .mp4 files published in this repository's Releases and on
+other platforms) and the written guides (the .tex and .pdf files in the
+guide/ folders) are licensed under the Creative Commons Attribution 4.0
+International License (CC BY 4.0).
+
+You may copy, share, adapt and use this material for any purpose, including
+commercially, as long as you:
+
+  - give credit to Carla González Mina,
+  - link to the license, and
+  - indicate whether you made changes.
+
+Summary: https://creativecommons.org/licenses/by/4.0/
+Legal code: https://creativecommons.org/licenses/by/4.0/legalcode
+
+The source code (.py files) is licensed under the MIT License; see LICENSE.

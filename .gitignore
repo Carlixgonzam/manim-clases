@@ -1,11 +1,11 @@
-# Videos: se publican como archivos de los Releases, no en el historial de git
+# Videos are published as Release assets, not in the git history
 *.mp4
 *.mp4.part
 
-# Material de curso de terceros que no se publica
+# Third-party course material that is not published
 fuentes/
 
-# Salidas desechables de manimgx
+# Disposable manimgx output
 *.storyboard*.png
 *.srt
 
@@ -20,5 +20,5 @@ fuentes/
 __pycache__/
 *.pyc
 
-# Sistema
+# System
 .DS_Store
