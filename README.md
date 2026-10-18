@@ -2,19 +2,19 @@
 
 Animated lessons on mathematics and computer science, made with [ManimGX](https://manimgx.academa.ai).
 
-Each series comes with the videos, the code that renders them, and a written guide.
+Each series comes with the videos, the code that renders them and a written guide.
 
 ## Series
 
 | Area | Series | Status |
 |---|---|---|
-| Mathematics | [Number theory](mathematics/number-theory/) | 4 videos + guide |
+| Mathematics | [Number theory](mathematics/number-theory/) | 4 videos and a guide |
 | Computer science | [Languages and machines](computer-science/languages-and-machines/) | Planned |
 | Computer science | [Software architecture](computer-science/software-architecture/) | Planned |
 
-Videos are in the [Releases](https://github.com/Carlixgonzam/manim-clases/releases/latest).
+You can download the videos from the [latest release](https://github.com/Carlixgonzam/manim-clases/releases/latest).
 
-## Render a video
+## Rendering a video
 
 ```bash
 pip install manimgx
@@ -24,4 +24,4 @@ manimgx render module1_divisibility.py Module1 --fps 30
 
 ## License
 
-Code: [MIT](LICENSE). Videos and guides: [CC BY 4.0](LICENSE-CONTENT).
+The code is under the [MIT license](LICENSE), and the videos and guides are under [CC BY 4.0](LICENSE-CONTENT).

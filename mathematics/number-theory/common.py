@@ -161,7 +161,7 @@ class Lesson(m.ThreeDScene):
     def cap(self, text: str, color=INK, hold: float | None = None, *anims, run_time: float = 0.6):
         """Caption at the bottom, the way a teacher would say it; waits as long as it takes to read."""
         lines = textwrap.wrap(text, 84)
-        t = m.Text("\n".join(lines), font_size=24, color=color)
+        t = m.VGroup(*(m.Text(line, font_size=24, color=color) for line in lines)).arrange(m.DOWN, buff=0.14)
         bg = m.RoundedRectangle(width=t.width + 0.5, height=t.height + 0.3, corner_radius=0.12,
                                 fill_color=BG, fill_opacity=0.72, stroke_width=0).move_to(t)
         new = m.VGroup(bg, t).to_edge(m.DOWN, buff=0.22)

@@ -23,7 +23,7 @@
 \newcommand{\md}[1]{\ (\mathrm{mod}\ #1)}
 \DeclareMathOperator{\lcm}{lcm}
 
-% Book-style notes: a small-caps heading, no boxes or colors.
+% Book-style notes with a small-caps heading and no boxes or colors.
 \newtheoremstyle{note}{\topsep}{\topsep}{\normalfont}{0pt}{\scshape}{.}{0.6em}{\thmname{#1}}
 \newtheoremstyle{noteit}{\topsep}{\topsep}{\itshape}{0pt}{\scshape}{.}{0.6em}{\thmname{#1}}
 \theoremstyle{noteit}
@@ -42,112 +42,112 @@
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{5pt}
 
-\title{\textbf{Number Theory}\\[2pt]\large A detailed guide: divisibility, congruences, Euler and RSA}
+\title{\textbf{Number Theory}\\[2pt]\large A detailed guide to divisibility, congruences, Euler and RSA}
 \author{Carla González Mina}
-\date{Companion to the \emph{Number Theory} video series in \texttt{manim-clases} \,$\cdot$\, reference: Rosen, ch.~4}
+\date{Companion to the \emph{Number Theory} videos in \texttt{manim-clases} \,$\cdot$\, main reference Rosen, ch.~4}
 
 \begin{document}
 \maketitle
 
 \begin{quotation}\small
 \noindent\textsc{How to use this guide.}\enspace
-Every topic follows the same order: \textbf{the question} it answers, the \textbf{intuition} (what the videos show), the \textbf{formal statement}, the full \textbf{proof}, and a \textbf{worked example} line by line. Each topic ends with three memory anchors: the \emph{proof sketch}, the \emph{canonical counterexample} (what breaks if you drop a hypothesis) and a \emph{rule of thumb}. Each module ends with exercises and their solutions.
+Each topic opens with the \textbf{question} it answers and the \textbf{intuition} behind it, which is what the videos show. Then comes the \textbf{formal statement}, a full \textbf{proof} and a \textbf{worked example}. Most topics close with three short reminders. The \emph{proof sketch} is the argument in a few steps, the \emph{canonical counterexample} shows what breaks when you drop a hypothesis, and the \emph{rule of thumb} tells you when to use the result. Every module ends with exercises and their solutions.
 
-Every number in this guide was checked with Python (\texttt{pow}, \texttt{math.gcd} and exhaustive search).
+All the numbers in this guide were checked in Python with \texttt{pow}, \texttt{math.gcd} and exhaustive search.
 \end{quotation}
 
 \tableofcontents
 \newpage
 
 %======================================================================
-\section{Module 1: Divisibility, the division algorithm, gcd and the FTA}
+\section{Module 1. Divisibility, the division algorithm, gcd and the FTA}
 %======================================================================
 
 \subsection{Divisibility}
 
 \begin{question}
-What exactly does it mean for one number to ``fit'' a whole number of times into another, and which rules can you use without thinking twice?
+What does it mean for one number to fit into another a whole number of times, and which rules can you use without a second thought?
 \end{question}
 
 \begin{definition}
-Let $a,b\in\Z$ with $a\neq 0$. We say that $a$ \textbf{divides} $b$, and write $a\mid b$, if there is $k\in\Z$ with $b=a\cdot k$. Otherwise we write $a\nmid b$.
+Let $a,b\in\Z$ with $a\neq 0$. We say that $a$ \textbf{divides} $b$, written $a\mid b$, if $b=a\cdot k$ for some $k\in\Z$. If there is no such $k$ we write $a\nmid b$.
 \end{definition}
 
 \begin{intuition}
-$a\mid b$ means that $b$ can be covered exactly by blocks of size $|a|$, with nothing left over. For example, $3\mid 12$ because $12$ is four blocks of $3$, and $5\nmid 12$ because blocks of 5 leave 2 over. The whole theory in this guide comes from a single idea: \emph{write what you know as ``$b=ak$'' and do algebra}.
+$a\mid b$ means you can cover $b$ exactly with blocks of size $|a|$ and have nothing left over. So $3\mid 12$ because $12$ is four blocks of $3$, while $5\nmid 12$ because blocks of 5 leave 2 behind. Almost everything in this guide grows out of one habit, which is to \emph{write what you know as $b=ak$ and then do algebra}.
 \end{intuition}
 
 \begin{theorem}[Basic properties]
-For all $a,b,c,x,y\in\Z$ (with nonzero divisors):
+For all $a,b,c,x,y\in\Z$, with nonzero divisors,
 \begin{enumerate}
-  \item $1\mid a$, $a\mid 0$ and, if $a\ne 0$, $a\mid a$.
-  \item \textbf{Transitivity:} if $a\mid b$ and $b\mid c$ then $a\mid c$.
-  \item \textbf{Linear combination:} if $a\mid b$ and $a\mid c$ then $a\mid (bx+cy)$.
-  \item \textbf{Bound:} if $b\ne 0$ and $a\mid b$ then $|a|\le|b|$.
-  \item \textbf{Antisymmetry:} if $a,b>0$, $a\mid b$ and $b\mid a$, then $a=b$. In $\Z$, $a=\pm b$.
+  \item $1\mid a$, $a\mid 0$, and $a\mid a$ when $a\ne 0$.
+  \item \textbf{Transitivity.} If $a\mid b$ and $b\mid c$ then $a\mid c$.
+  \item \textbf{Linear combinations.} If $a\mid b$ and $a\mid c$ then $a\mid (bx+cy)$.
+  \item \textbf{Size.} If $b\ne 0$ and $a\mid b$ then $|a|\le|b|$.
+  \item \textbf{Antisymmetry.} If $a,b>0$, $a\mid b$ and $b\mid a$, then $a=b$. In $\Z$ the conclusion is $a=\pm b$.
 \end{enumerate}
 \end{theorem}
 
 \begin{proof}
 \textbf{(1)} $a=1\cdot a$, $0=a\cdot 0$ and $a=a\cdot 1$.
 
-\textbf{(2)} There are $k,\ell\in\Z$ with $b=ak$ and $c=b\ell$. Then $c=(ak)\ell=a(k\ell)$ and $k\ell\in\Z$.
+\textbf{(2)} Write $b=ak$ and $c=b\ell$ with $k,\ell\in\Z$. Then $c=(ak)\ell=a(k\ell)$ and $k\ell$ is an integer.
 
-\textbf{(3)} There are $k,\ell$ with $b=ak$, $c=a\ell$. Then $bx+cy=akx+a\ell y=a(kx+\ell y)$, with $kx+\ell y\in\Z$.
+\textbf{(3)} Write $b=ak$ and $c=a\ell$. Then $bx+cy=akx+a\ell y=a(kx+\ell y)$, and $kx+\ell y$ is an integer.
 
-\textbf{(4)} $b=ak$ with $k\ne 0$ (if $k=0$ then $b=0$). Since $k$ is a nonzero integer, $|k|\ge 1$, so $|b|=|a||k|\ge|a|$.
+\textbf{(4)} Write $b=ak$. Here $k\ne 0$, since otherwise $b=0$. A nonzero integer has $|k|\ge 1$, so $|b|=|a||k|\ge|a|$.
 
-\textbf{(5)} By (4), $a\le b$ and $b\le a$, so $a=b$. In $\Z$, applying (4) to absolute values gives $|a|=|b|$.
+\textbf{(5)} By (4), $a\le b$ and $b\le a$, so $a=b$. Over $\Z$ the same argument with absolute values gives $|a|=|b|$.
 \end{proof}
 
-Property (3) is \emph{the} tool of the topic: almost every proof ends by saying ``$d$ divides both terms, so it divides the sum''.
+Property (3) is the tool you'll use most. A huge number of proofs end with ``$d$ divides both terms, so it divides their sum''.
 
 \begin{counter}
-The converse of (3) is false: $3\mid (1+2)$ but $3\nmid 1$ and $3\nmid 2$. Knowing that $d$ divides a sum says nothing about each term.
+The converse of (3) is false. $3\mid (1+2)$, yet $3\nmid 1$ and $3\nmid 2$. Knowing that $d$ divides a sum tells you nothing about the individual terms.
 \end{counter}
 
 \begin{thumbrule}
-To prove $a\mid(\text{something})$: write ``something'' as $a\cdot(\text{integer})$, or as a linear combination of things $a$ already divides.
+To prove $a\mid(\text{something})$, write that something as $a$ times an integer, or as a combination of things $a$ already divides.
 \end{thumbrule}
 
 \subsection{The division algorithm}
 
 \begin{question}
-If $d\nmid a$, how do you describe exactly ``what's left over''? And why is it unique?
+When $d\nmid a$, how do we describe exactly what's left over, and why is there only one way to do it?
 \end{question}
 
 \begin{theorem}[Division algorithm]
-Given $a\in\Z$ and $d\in\Z^{+}$, there are \textbf{unique} $q,r\in\Z$ such that
+Given $a\in\Z$ and $d\in\Z^{+}$, there are \textbf{unique} integers $q$ and $r$ with
 \[ a=dq+r,\qquad 0\le r<d. \]
-Moreover $q=\lfloor a/d\rfloor$ and $r=a\bmod d=a-d\lfloor a/d\rfloor$.
+In fact $q=\lfloor a/d\rfloor$ and $r=a\bmod d=a-d\lfloor a/d\rfloor$.
 \end{theorem}
 
 \begin{intuition}
-Mark the multiples of $d$ on the number line: $\dots,-2d,-d,0,d,2d,\dots$. The number $a$ lands in exactly one ``drawer'' $[dq,\,d(q+1))$. The quotient $q$ says which drawer, and the remainder $r$ says how far into the drawer it went, a distance between $0$ and $d-1$. That's why, \textbf{even when $a$ is negative, $r$ is never negative}: it is always measured from the multiple \emph{to the left}.
+Mark the multiples of $d$ on the number line, $\dots,-2d,-d,0,d,2d,\dots$. The number $a$ falls into exactly one ``drawer'' $[dq,\,d(q+1))$. The quotient $q$ says which drawer, and the remainder $r$ says how far into the drawer $a$ sits, somewhere between $0$ and $d-1$. That's why \textbf{the remainder is never negative, even when $a$ is}. It's always measured from the multiple on the \emph{left}.
 \end{intuition}
 
 \begin{proof}
-\textbf{Existence.} Let $S=\{a-dk : k\in\Z,\ a-dk\ge 0\}$. $S\ne\varnothing$: if $a\ge 0$ take $k=0$; if $a<0$ take $k=a$, and then $a-da=a(1-d)\ge 0$ because $a<0$ and $1-d\le 0$. By the well-ordering principle, $S$ has a minimum $r=a-dq\ge 0$. If $r\ge d$, then $r-d=a-d(q+1)\ge 0$ would be in $S$ and smaller than $r$, a contradiction. Hence $0\le r<d$.
+\textbf{Existence.} Let $S=\{a-dk : k\in\Z,\ a-dk\ge 0\}$. This set isn't empty. If $a\ge 0$ take $k=0$, and if $a<0$ take $k=a$, which gives $a-da=a(1-d)\ge 0$ since $a<0$ and $1-d\le 0$. By the well-ordering principle $S$ has a smallest element $r=a-dq\ge 0$. If $r$ were at least $d$, then $r-d=a-d(q+1)$ would also be in $S$ and smaller than $r$, which is impossible. Hence $0\le r<d$.
 
-\textbf{Uniqueness.} If $a=dq+r=dq'+r'$ with $0\le r,r'<d$, then $d(q-q')=r'-r$. So $d\mid(r'-r)$, but $-d<r'-r<d$. The only multiple of $d$ in that interval is $0$, so $r=r'$ and, since $d\ne0$, $q=q'$.
+\textbf{Uniqueness.} Suppose $a=dq+r=dq'+r'$ with $0\le r,r'<d$. Then $d(q-q')=r'-r$, so $d\mid(r'-r)$. But $-d<r'-r<d$, and the only multiple of $d$ in that range is $0$. So $r=r'$, and since $d\ne0$ we also get $q=q'$.
 \end{proof}
 
 \begin{example}
-$a=-20$, $d=3$. The multiples of 3 around $-20$ are $-21$ and $-18$. The one to the left is $-21=3\cdot(-7)$, and from $-21$ to $-20$ is $1$. So $-20=3(-7)+1$: $q=-7$, $r=1$.
+Take $a=-20$ and $d=3$. The multiples of 3 on either side of $-20$ are $-21$ and $-18$. The one on the left is $-21=3\cdot(-7)$, and $-20$ is one step past it. So $-20=3(-7)+1$, with $q=-7$ and $r=1$.
 \end{example}
 
 \begin{mistake}
-$-20=3(-6)-2$ is a true equation but it is \textbf{not} the division, because $r=-2<0$. If you get a negative remainder, subtract 1 from the quotient and add $d$ to the remainder: $(-6,-2)\to(-7,1)$.
+$-20=3(-6)-2$ is a true equation, but it is \textbf{not} the division, because $r=-2$ is negative. If you ever get a negative remainder, subtract 1 from the quotient and add $d$ to the remainder, turning $(-6,-2)$ into $(-7,1)$.
 \end{mistake}
 
 \subsection{Greatest common divisor}
 
 \begin{definition}
-For $a,b\in\Z$ not both zero, $\gcd(a,b)=\max\{d\in\Z^+ : d\mid a\ \wedge\ d\mid b\}$. The maximum exists because the set is nonempty ($1$ is in it) and bounded (by the bound property, $d\le\max(|a|,|b|)$). We say $a$ and $b$ are \textbf{relatively prime} (coprime) if $\gcd(a,b)=1$.
+For $a,b\in\Z$, not both zero, $\gcd(a,b)=\max\{d\in\Z^+ : d\mid a\ \wedge\ d\mid b\}$. The maximum exists because the set contains $1$ and, by the size property, every element is at most $\max(|a|,|b|)$. We call $a$ and $b$ \textbf{coprime}, or relatively prime, when $\gcd(a,b)=1$.
 \end{definition}
 
 \begin{question}
-How do you compute the gcd without factoring? Factoring large numbers is hard, but dividing is easy.
+How do you find the gcd without factoring? Factoring large numbers is hard, but dividing them is easy.
 \end{question}
 
 \begin{lemma}[Euclid's lemma for the gcd]
@@ -155,42 +155,42 @@ If $a=bq+r$, then $\gcd(a,b)=\gcd(b,r)$.
 \end{lemma}
 
 \begin{proof}
-The idea is to prove something stronger: \emph{both pairs have exactly the same common divisors}. Then their maximum is the same.
+We prove something stronger, namely that \emph{the two pairs have exactly the same common divisors}. Their largest common divisors then have to agree.
 \begin{itemize}
-\item If $d\mid a$ and $d\mid b$, then $d\mid a-bq=r$ (linear combination). So $d$ is a common divisor of $b$ and $r$.
-\item If $d\mid b$ and $d\mid r$, then $d\mid bq+r=a$. So $d$ is a common divisor of $a$ and $b$.
+\item If $d\mid a$ and $d\mid b$, then $d$ divides the combination $a-bq=r$, so $d$ is a common divisor of $b$ and $r$.
+\item If $d\mid b$ and $d\mid r$, then $d\mid bq+r=a$, so $d$ is a common divisor of $a$ and $b$.
 \end{itemize}
-The two sets of common divisors are equal, so their maximums agree.
+The two sets of common divisors are equal, so their maximums are equal too.
 \end{proof}
 
-A useful special case is $q=1$: $\gcd(x,y)=\gcd(x,y-x)$. It can also be proved with the double inequality $d_1\le d_2$ and $d_2\le d_1$, which is the same idea seen through the maximums.
+The case $q=1$ is worth remembering on its own, $\gcd(x,y)=\gcd(x,y-x)$. You can also prove it by showing $d_1\le d_2$ and $d_2\le d_1$, which is the same idea looked at through the maximums.
 
 \subsection{Euclid's algorithm}
 
 \begin{intuition}
-Draw an $a\times b$ rectangle. Cut out as many squares of side $b$ as fit (that's $q_1$), and what's left is a $b\times r_1$ rectangle. Repeat with that rectangle. The side of the last square, the one that fills the rectangle exactly, is the gcd: the largest square tile that tiles the original rectangle. This is exactly what the Euclid chapter of the module 1 video shows.
+Draw an $a\times b$ rectangle. Cut off as many $b\times b$ squares as will fit, which is $q_1$ of them, and you're left with a $b\times r_1$ rectangle. Do the same with that one, and keep going. The side of the last square, the one that fills what's left exactly, is the gcd. It's the largest square tile that covers the original rectangle with no gaps, and it's exactly what the Euclid chapter of the module 1 video animates.
 \end{intuition}
 
 \begin{theorem}
-Applying successive divisions
+Apply the division algorithm over and over,
 \[
 \begin{aligned}
 a&=bq_1+r_1, & 0&\le r_1<b\\
 b&=r_1q_2+r_2, & 0&\le r_2<r_1\\
 &\ \,\vdots\\
 r_{k-2}&=r_{k-1}q_k+r_k, & 0&<r_k<r_{k-1}\\
-r_{k-1}&=r_kq_{k+1}+0,
+r_{k-1}&=r_kq_{k+1}+0.
 \end{aligned}
 \]
-the process stops and $\gcd(a,b)=r_k$, the \textbf{last nonzero remainder}.
+The process stops, and $\gcd(a,b)=r_k$, the \textbf{last nonzero remainder}.
 \end{theorem}
 
 \begin{proof}
-It stops because $b>r_1>r_2>\cdots\ge 0$ is a strictly decreasing sequence of natural numbers, which can't be infinite. By the lemma, $\gcd(a,b)=\gcd(b,r_1)=\cdots=\gcd(r_{k-1},r_k)=\gcd(r_k,0)=r_k$.
+The process stops because $b>r_1>r_2>\cdots\ge 0$ is a strictly decreasing sequence of natural numbers, and such a sequence can't go on forever. The lemma then gives $\gcd(a,b)=\gcd(b,r_1)=\cdots=\gcd(r_{k-1},r_k)=\gcd(r_k,0)=r_k$.
 \end{proof}
 
 \begin{example}
-$\gcd(89,55)$:
+Here is $\gcd(89,55)$.
 \[
 \begin{array}{r@{\;=\;}l}
 89 & 1\cdot 55+34\\
@@ -205,161 +205,161 @@ $\gcd(89,55)$:
 \end{array}
 \qquad\Rightarrow\qquad \gcd(89,55)=1.
 \]
-Every quotient is 1 because 89 and 55 are consecutive Fibonacci numbers. That is the algorithm's \emph{worst case}: the remainders shrink as slowly as possible (Lamé's theorem).
+Every quotient is 1 because 89 and 55 are consecutive Fibonacci numbers. This is the slowest the algorithm can possibly go, a fact known as Lamé's theorem.
 \end{example}
 
 \subsection{The Fundamental Theorem of Arithmetic}
 
 \begin{theorem}[FTA]
-Every integer $n>1$ can be written as a product of primes, $n=p_1^{a_1}p_2^{a_2}\cdots p_k^{a_k}$, and that factorization is unique up to order.
+Every integer $n>1$ is a product of primes, $n=p_1^{a_1}p_2^{a_2}\cdots p_k^{a_k}$, and this factorization is unique apart from the order of the factors.
 \end{theorem}
 
 \begin{proof}[Proof idea]
-\emph{Existence}, by strong induction: if $n$ is prime we're done. Otherwise $n=ab$ with $1<a,b<n$, and each factor factors by the induction hypothesis. \emph{Uniqueness}: if $p_1\cdots p_r=q_1\cdots q_s$, then $p_1$ divides the product of the $q_j$. By \textbf{Euclid's lemma} (Module 2: $p\mid ab\Rightarrow p\mid a$ or $p\mid b$), $p_1$ divides some $q_j$, and since $q_j$ is prime, $p_1=q_j$. Cancel and repeat.
+\emph{Existence} goes by strong induction. If $n$ is prime there's nothing to do. Otherwise $n=ab$ with $1<a,b<n$, and both factors split into primes by the induction hypothesis. \emph{Uniqueness} goes like this. If $p_1\cdots p_r=q_1\cdots q_s$, then $p_1$ divides the product of the $q_j$. By \textbf{Euclid's lemma} from Module 2, which says $p\mid ab$ forces $p\mid a$ or $p\mid b$, the prime $p_1$ divides some $q_j$, and since $q_j$ is prime, $p_1=q_j$. Cancel it and repeat.
 \end{proof}
 
-\begin{theorem}[Euclid: there are infinitely many primes]
+\begin{theorem}[Euclid, there are infinitely many primes]
 \end{theorem}
 \begin{proof}
-Suppose there are only finitely many primes $p_1,\dots,p_k$. Let $N=p_1p_2\cdots p_k+1>1$. By the FTA, $N$ has some prime factor $p$, which must be one of the $p_i$. Then $p\mid N$ and $p\mid p_1\cdots p_k$, so $p\mid N-p_1\cdots p_k=1$. That's impossible because $p>1$.
+Suppose there were only finitely many primes $p_1,\dots,p_k$, and let $N=p_1p_2\cdots p_k+1$, which is bigger than 1. By the FTA, $N$ has a prime factor $p$, and $p$ must be one of the $p_i$. Then $p$ divides both $N$ and $p_1\cdots p_k$, so it divides $N-p_1\cdots p_k=1$. That's impossible for a number bigger than 1.
 \end{proof}
 
 \begin{counter}
-The proof does \textbf{not} say that $N$ is prime. $2\cdot3\cdot5\cdot7\cdot11\cdot13+1=30031=59\cdot 509$. What it says is that the prime factors of $N$ are \emph{new}, that is, not on the list.
+The proof does \textbf{not} say that $N$ is prime. For example $2\cdot3\cdot5\cdot7\cdot11\cdot13+1=30031=59\cdot 509$. What it says is that the prime factors of $N$ are \emph{new}, meaning they aren't on the original list.
 \end{counter}
 
-\textbf{gcd and lcm from the factorization.} If $a=\prod p_i^{\alpha_i}$ and $b=\prod p_i^{\beta_i}$ (allowing exponents $0$):
+\textbf{The gcd and lcm from a factorization.} Write $a=\prod p_i^{\alpha_i}$ and $b=\prod p_i^{\beta_i}$, allowing some exponents to be $0$. Then
 \[
 \gcd(a,b)=\prod p_i^{\min(\alpha_i,\beta_i)},\qquad \lcm(a,b)=\prod p_i^{\max(\alpha_i,\beta_i)},\qquad a\cdot b=\gcd(a,b)\cdot\lcm(a,b).
 \]
-The last identity comes from $\min(\alpha,\beta)+\max(\alpha,\beta)=\alpha+\beta$ for each prime.
+The last identity holds because $\min(\alpha,\beta)+\max(\alpha,\beta)=\alpha+\beta$ for each prime.
 
 \begin{example}
-$a=2^3\cdot3^2\cdot7=504$, $b=2\cdot3^4\cdot5=810$. Then $\gcd=2^1\cdot3^2=18$ and $\lcm=2^3\cdot3^4\cdot5\cdot7=22680$. Check: $504\cdot810=408240=18\cdot22680$.
+For $a=2^3\cdot3^2\cdot7=504$ and $b=2\cdot3^4\cdot5=810$ we get $\gcd=2^1\cdot3^2=18$ and $\lcm=2^3\cdot3^4\cdot5\cdot7=22680$. As a check, $504\cdot810=408240=18\cdot22680$.
 \end{example}
 
 \begin{sketch}
-\textbf{gcd by Euclid:} (1) divide; (2) replace the pair $(a,b)$ by $(b,r)$ because they have the same common divisors; (3) the remainders strictly decrease, so the process stops; (4) $\gcd(r_k,0)=r_k$.
+For Euclid's algorithm, (1) divide, (2) swap the pair $(a,b)$ for $(b,r)$, which has the same common divisors, (3) notice the remainders keep shrinking, so the process ends, and (4) use $\gcd(r_k,0)=r_k$.
 \end{sketch}
 
 \begin{thumbrule}
-Large numbers? Euclid. Already factored? Smallest exponents for the gcd and largest for the lcm.
+Use Euclid for big numbers. If the numbers are already factored, take the smaller exponents for the gcd and the larger ones for the lcm.
 \end{thumbrule}
 
 \subsection*{Module 1 exercises}
 \begin{enumerate}[label=\textbf{1.\arabic*}]
-\item Find $q$ and $r$ for $a=-47$, $d=6$.\\
-\emph{Sol.} The multiple of 6 to the left of $-47$ is $-48=6(-8)$. So $-47=6(-8)+1$: $q=-8$, $r=1$.
-\item Compute $\gcd(252,198)$ with Euclid.\\
-\emph{Sol.} $252=1\cdot198+54$, $198=3\cdot54+36$, $54=1\cdot36+18$, $36=2\cdot18+0$. The gcd is $18$.
-\item If $a\mid b$ and $a\mid b+2$, prove that $a\mid 2$.\\
-\emph{Sol.} By linear combination, $a\mid (b+2)\cdot1+b\cdot(-1)=2$.
-\item Prove that $\gcd(n,n+1)=1$ for every $n$.\\
-\emph{Sol.} If $d\mid n$ and $d\mid n+1$, then $d\mid (n+1)-n=1$, so $d=1$.
+\item Find $q$ and $r$ for $a=-47$ and $d=6$.\\
+\emph{Solution.} The multiple of 6 just to the left of $-47$ is $-48=6(-8)$, so $-47=6(-8)+1$, with $q=-8$ and $r=1$.
+\item Compute $\gcd(252,198)$ with Euclid's algorithm.\\
+\emph{Solution.} $252=1\cdot198+54$, $198=3\cdot54+36$, $54=1\cdot36+18$ and $36=2\cdot18+0$, so the gcd is $18$.
+\item If $a\mid b$ and $a\mid b+2$, show that $a\mid 2$.\\
+\emph{Solution.} $a$ divides the combination $(b+2)\cdot1+b\cdot(-1)=2$.
+\item Show that $\gcd(n,n+1)=1$ for every $n$.\\
+\emph{Solution.} A common divisor $d$ of $n$ and $n+1$ divides $(n+1)-n=1$, so $d=1$.
 \end{enumerate}
 
 \newpage
 %======================================================================
-\section{Module 2: Bézout, extended Euclid and modular inverses}
+\section{Module 2. Bézout, extended Euclid and modular inverses}
 %======================================================================
 
 \subsection{Bézout's identity}
 
 \begin{question}
-The gcd was defined as ``the greatest common divisor'', a \emph{multiplicative} notion. Can it also be described \emph{additively}, with sums of multiples of $a$ and $b$?
+The gcd was defined as the greatest common divisor, which is a \emph{multiplicative} idea. Can we also describe it \emph{additively}, using sums of multiples of $a$ and $b$?
 \end{question}
 
 \begin{intuition}
-Picture two rulers with no markings, one $a$ cm long and one $b$ cm long. Laying them end to end or subtracting one from the other, which lengths can you measure? Exactly the numbers $sa+tb$. With $a=6$ and $b=10$ you can only measure multiples of $2$, and you can measure $2$ itself: $2=2\cdot6-1\cdot10$. The smallest length you can measure is the gcd, and every other one is a multiple of it. In the video this is a grid of points $(s,t)$, each with its value $sa+tb$.
+Picture two rulers with no markings, one $a$ cm long and one $b$ cm long. By laying them end to end or measuring the difference between them, the lengths you can reach are exactly the numbers $sa+tb$. With $a=6$ and $b=10$ you only ever get multiples of $2$, and you can get $2$ itself, since $2=2\cdot6-1\cdot10$. The smallest length you can measure is the gcd, and every other length is a multiple of it. In the video this appears as a grid of points $(s,t)$, each labeled with its value $sa+tb$.
 \end{intuition}
 
 \begin{theorem}[Bézout]
-If $a,b\in\Z$ are not both zero, there are $s,t\in\Z$ with $\gcd(a,b)=sa+tb$. Moreover, $\gcd(a,b)$ is the \textbf{smallest} positive element of the set $L=\{sa+tb: s,t\in\Z\}$.
+If $a,b\in\Z$ are not both zero, then $\gcd(a,b)=sa+tb$ for some $s,t\in\Z$. In fact $\gcd(a,b)$ is the \textbf{smallest} positive element of $L=\{sa+tb: s,t\in\Z\}$.
 \end{theorem}
 
 \begin{proof}
-$L$ has positive elements (for instance $a\cdot a+b\cdot b>0$). Let $g=s_0a+t_0b$ be the smallest of them (well-ordering).
+$L$ has positive elements, for example $a\cdot a+b\cdot b$. By well-ordering it has a smallest one, which we call $g=s_0a+t_0b$.
 
-\emph{$g$ divides $a$.} Divide: $a=gq+r$ with $0\le r<g$. Then $r=a-gq=a-(s_0a+t_0b)q=(1-s_0q)a+(-t_0q)b\in L$. If $r>0$, it would be a positive element of $L$ smaller than $g$, which is impossible. So $r=0$ and $g\mid a$. The same argument gives $g\mid b$.
+\emph{$g$ divides $a$.} Divide to get $a=gq+r$ with $0\le r<g$. Then $r=a-gq=a-(s_0a+t_0b)q=(1-s_0q)a+(-t_0q)b$, so $r$ is in $L$ too. If $r$ were positive it would be an element of $L$ smaller than $g$, so $r=0$ and $g\mid a$. The same argument shows $g\mid b$.
 
-\emph{$g$ is the greatest.} If $d\mid a$ and $d\mid b$, then $d\mid s_0a+t_0b=g$, so $d\le g$.
+\emph{$g$ is the largest.} If $d\mid a$ and $d\mid b$, then $d\mid s_0a+t_0b=g$, so $d\le g$.
 
-So $g$ is a common divisor and is at least as large as any other: $g=\gcd(a,b)$.
+So $g$ is a common divisor that is at least as big as any other, which makes it $\gcd(a,b)$.
 \end{proof}
 
-\begin{corollary}[Coprimality test]
-$\gcd(a,b)=1\iff$ there are $s,t\in\Z$ with $sa+tb=1$.
+\begin{corollary}[The coprimality test]
+$\gcd(a,b)=1$ if and only if $sa+tb=1$ for some $s,t\in\Z$.
 \end{corollary}
 \begin{proof}
-($\Rightarrow$) is Bézout. ($\Leftarrow$) If $d\mid a$ and $d\mid b$, then $d\mid sa+tb=1$, so $d=1$.
+One direction is Bézout. For the other, any common divisor $d$ of $a$ and $b$ divides $sa+tb=1$, so $d=1$.
 \end{proof}
 
 \begin{mistake}
-For an arbitrary $g$, $sa+tb=g$ does \textbf{not} imply $g=\gcd(a,b)$: $1\cdot 6+1\cdot 10=16$, while $\gcd(6,10)=2$. All you can conclude is $\gcd(a,b)\mid g$. The converse only works for $g=1$.
+For a general $g$, getting $sa+tb=g$ does \textbf{not} make $g$ the gcd. For instance $1\cdot 6+1\cdot 10=16$ while $\gcd(6,10)=2$. All you can conclude is $\gcd(a,b)\mid g$, and the converse only holds when $g=1$.
 \end{mistake}
 
-\subsection{The three lemmas that follow from Bézout}
+\subsection{Three lemmas that follow from Bézout}
 
 \begin{lemma}[Coprime divisibility]\label{lem:coprime}
 If $a\mid bc$ and $\gcd(a,b)=1$, then $a\mid c$.
 \end{lemma}
-\begin{proof}[Proof (the template)]
+\begin{proof}[Proof, the template]
 \begin{enumerate}
-\item Since $\gcd(a,b)=1$, by Bézout there are $s,t$ with $sa+tb=1$.
-\item Multiply by $c$: $sac+tbc=c$.
-\item $a\mid sac$ because $sac=a(sc)$, and $a\mid tbc$ because $bc=ak$ by hypothesis, so $tbc=a(tk)$.
-\item By linear combination, $a\mid sac+tbc=c$.\qedhere
+\item Since $\gcd(a,b)=1$, Bézout gives $s,t$ with $sa+tb=1$.
+\item Multiply through by $c$ to get $sac+tbc=c$.
+\item $a$ divides $sac=a(sc)$, and it divides $tbc$ because $bc=ak$ by hypothesis, so $tbc=a(tk)$.
+\item So $a$ divides the sum $sac+tbc$, which is $c$.\qedhere
 \end{enumerate}
 \end{proof}
-A typical exercise is solved exactly the same way, with $d$ in place of $a$: $dx+by=1\Rightarrow adx+aby=a\Rightarrow d(ax+ky)=a$.
+A typical exercise follows exactly the same steps with $d$ in place of $a$, going from $dx+by=1$ to $adx+aby=a$ and then to $d(ax+ky)=a$.
 
 \begin{counter}
-Without coprimality it fails: $6\mid 4\cdot 3=12$ but $6\nmid 3$. The factor $2$ of $6$ ``hid'' in the $4$.
+Without coprimality the lemma fails. $6\mid 4\cdot 3=12$, but $6\nmid 3$, because the factor $2$ of $6$ is hiding in the $4$.
 \end{counter}
 
 \begin{lemma}[Euclid's lemma]
 If $p$ is prime and $p\mid ab$, then $p\mid a$ or $p\mid b$.
 \end{lemma}
 \begin{proof}
-If $p\mid a$ there is nothing to prove. If $p\nmid a$, the only positive divisors of $p$ are $1$ and $p$, and $p$ doesn't divide $a$, so $\gcd(p,a)=1$. By the previous lemma, $p\mid b$.
+If $p\mid a$ we're done. Otherwise $\gcd(p,a)=1$, because the only positive divisors of $p$ are $1$ and $p$ and the second one doesn't divide $a$. The previous lemma then gives $p\mid b$.
 \end{proof}
 
 \begin{counter}
-It fails for composites: $6\mid 2\cdot 3$ but $6\nmid2$ and $6\nmid3$. This lemma is what makes primes special, and it is the key step in the uniqueness part of the FTA and in the self-inverse elements of Module 4.
+It fails for composite numbers. $6\mid 2\cdot 3$, but $6\nmid2$ and $6\nmid3$. This lemma is what makes primes special. It's the key step in the uniqueness part of the FTA, and it comes back with the self-inverse elements in Module 4.
 \end{counter}
 
 \begin{lemma}[Coprime divisors]
 If $a\mid c$, $b\mid c$ and $\gcd(a,b)=1$, then $ab\mid c$.
 \end{lemma}
 \begin{proof}
-$c=ak$. Since $b\mid ak$ and $\gcd(b,a)=1$, by Lemma~\ref{lem:coprime} $b\mid k$, that is, $k=b\ell$. Then $c=ab\ell$.
+Write $c=ak$. Since $b\mid ak$ and $\gcd(b,a)=1$, Lemma~\ref{lem:coprime} gives $b\mid k$, say $k=b\ell$. Then $c=ab\ell$.
 \end{proof}
 \begin{counter}
-$4\mid 12$ and $6\mid 12$, but $24\nmid 12$. They share the factor $2$ and you would be counting it twice.
+$4\mid 12$ and $6\mid 12$, but $24\nmid 12$. The two divisors share a factor of $2$, and the product counts it twice.
 \end{counter}
 
-\begin{lemma}[gcd with a product]
+\begin{lemma}[The gcd of a product]
 If $\gcd(a,b)=1$ and $\gcd(a,c)=1$, then $\gcd(a,bc)=1$.
 \end{lemma}
 \begin{proof}
-By Bézout, $ax_1+by_1=1$ and $ax_2+cy_2=1$. Multiply the two identities:
+Bézout gives $ax_1+by_1=1$ and $ax_2+cy_2=1$. Multiplying the two,
 \[
 1=(ax_1+by_1)(ax_2+cy_2)=a\underbrace{(ax_1x_2+x_1cy_2+by_1x_2)}_{X}+(bc)\underbrace{(y_1y_2)}_{Y}.
 \]
-Since $X,Y\in\Z$, the coprimality test (direction $\Leftarrow$) gives $\gcd(a,bc)=1$.
+$X$ and $Y$ are integers, so the coprimality test gives $\gcd(a,bc)=1$.
 \end{proof}
-The idea of \emph{multiplying two Bézout identities} works whenever you need to prove coprimality with a product.
+Multiplying two Bézout identities is a trick worth keeping in mind whenever you need coprimality with a product.
 
 \subsection{The extended Euclidean algorithm}
 
 \begin{question}
-Bézout says $s,t$ exist. How do you find them?
+Bézout tells us $s$ and $t$ exist. How do we actually find them?
 \end{question}
 
-\textbf{Method 1: back-substitution.} Solve each division for its remainder and substitute from the bottom up, always keeping the expression as a combination of the \emph{two most recent remainders}.
+\textbf{Back-substitution.} Solve each division for its remainder and substitute from the bottom up, always keeping the expression in terms of the \emph{two most recent remainders}.
 
-\begin{example}[$1$ as a combination of $89$ and $55$]
-Solving for the remainders in the table from the previous section:
+\begin{example}[Writing $1$ as a combination of $89$ and $55$]
+Starting from the divisions in the previous section,
 \[
 \begin{aligned}
 1 &= 3-1\cdot 2\\
@@ -372,14 +372,14 @@ Solving for the remainders in the table from the previous section:
   &= 13\cdot55-21(89-55) = 34\cdot 55-21\cdot 89.
 \end{aligned}
 \]
-Check: $34\cdot55=1870$, $21\cdot 89=1869$ and $1870-1869=1$. Another valid answer is $1=34\cdot89-55\cdot55$ ($3026-3025=1$): Bézout coefficients are \textbf{not unique}. If $(s,t)$ works, so does $(s+kb/g,\ t-ka/g)$. Both versions give the same inverse: $34$ and $-55\equiv34\md{89}$.
+To check, $34\cdot55=1870$ and $21\cdot 89=1869$, which differ by 1. Another valid answer is $1=34\cdot89-55\cdot55$, since $3026-3025=1$, so Bézout coefficients are \textbf{not unique}. Whenever $(s,t)$ works, so does $(s+kb/g,\ t-ka/g)$. Both answers give the same inverse, because $34$ and $-55$ are congruent mod $89$.
 \end{example}
 
-\textbf{Method 2: a table with a recurrence.} Start with $s_0=1,t_0=0$ (the row of $a$) and $s_1=0,t_1=1$ (the row of $b$), and at each step
+\textbf{The table method.} Start with $s_0=1,t_0=0$ for the row of $a$ and $s_1=0,t_1=1$ for the row of $b$. Each new row comes from
 \[
 r_j=r_{j-2}-q_{j-1}r_{j-1},\qquad s_j=s_{j-2}-q_{j-1}s_{j-1},\qquad t_j=t_{j-2}-q_{j-1}t_{j-1}.
 \]
-\emph{Why it works:} every row keeps the invariant $r_j=s_ja+t_jb$. The first two rows satisfy it ($a=1a+0b$, $b=0a+1b$), and if two rows satisfy it, so does the combination ``row$_{j-2}-q\cdot$row$_{j-1}$'', because everything is linear.
+\emph{Why it works.} Every row satisfies $r_j=s_ja+t_jb$. The first two rows do, since $a=1a+0b$ and $b=0a+1b$, and because everything is linear, the combination ``row $j-2$ minus $q$ times row $j-1$'' keeps the property.
 
 \begin{center}
 \begin{tabular}{cccccc}
@@ -399,7 +399,7 @@ $j$ & $r_j$ & $q_j$ & $s_j$ & $t_j$ & check $s_j\cdot89+t_j\cdot55$\\
 \bottomrule
 \end{tabular}
 \end{center}
-(The $q_j$ column is the quotient used to build the next row.)
+The $q_j$ column holds the quotient used to build the next row.
 
 \subsection{Modular inverses}
 
@@ -408,112 +408,113 @@ $\bar a$ is an \textbf{inverse of $a$ modulo $m$} if $a\bar a\equiv 1\md m$.
 \end{definition}
 
 \begin{theorem}
-$a$ has an inverse modulo $m$ $\iff$ $\gcd(a,m)=1$. In that case the inverse is unique modulo $m$.
+$a$ has an inverse modulo $m$ if and only if $\gcd(a,m)=1$, and in that case the inverse is unique modulo $m$.
 \end{theorem}
 \begin{proof}
-$a\bar a\equiv1\md m\iff m\mid a\bar a-1\iff a\bar a-1=mk\iff \bar a\, a+(-k)m=1$ for some $k$. By the coprimality test, that happens if and only if $\gcd(a,m)=1$.
+$a\bar a\equiv1\md m$ means $m\mid a\bar a-1$, that is, $a\bar a-1=mk$ for some $k$, or $\bar a\, a+(-k)m=1$. By the coprimality test this happens exactly when $\gcd(a,m)=1$.
 
-Uniqueness: if $a\bar a\equiv a\bar a'\equiv1$, then $\bar a=\bar a(a\bar a')=(\bar a a)\bar a'\equiv\bar a'$.
+For uniqueness, if $a\bar a\equiv a\bar a'\equiv1$, then $\bar a=\bar a(a\bar a')=(\bar a a)\bar a'\equiv\bar a'$.
 \end{proof}
 
-\textbf{Computing it:} extended Euclid gives $sa+tm=1$. Reducing mod $m$, the term $tm$ disappears, so $\bar a\equiv s\md m$.
+\textbf{Computing it.} Extended Euclid gives $sa+tm=1$. Reducing mod $m$ makes the $tm$ term disappear, so $\bar a\equiv s\md m$.
 
 \begin{example}
-From $34\cdot55-21\cdot89=1$, mod 89: $34\cdot55\equiv1$. So $55^{-1}\equiv34\md{89}$.
+Reducing $34\cdot55-21\cdot89=1$ mod 89 gives $34\cdot55\equiv1$, so $55^{-1}\equiv34\md{89}$.
 \end{example}
 
 \begin{counter}
-$2$ has no inverse mod $6$. The row of 2 in the multiplication table mod 6 is $0,2,4,0,2,4$, and 1 never shows up. That's because $2x-1$ is odd and $6x'$ is even.
+$2$ has no inverse mod $6$. The row of 2 in the multiplication table mod 6 is $0,2,4,0,2,4$, and 1 never appears, because $2x-1$ is odd while $6x'$ is even.
 \end{counter}
 
 \begin{thumbrule}
-Does $a^{-1}\bmod m$ exist? Compute $\gcd(a,m)$. If it's 1, read off the coefficient of $a$ in Bézout and reduce it mod $m$.
+To decide whether $a^{-1}\bmod m$ exists, compute $\gcd(a,m)$. If it's 1, the coefficient of $a$ in Bézout, reduced mod $m$, is the inverse.
 \end{thumbrule}
 
 \subsection*{Module 2 exercises}
 \begin{enumerate}[label=\textbf{2.\arabic*}]
-\item Write $18=\gcd(252,198)$ as a linear combination.\\
-\emph{Sol.} $18=54-36=54-(198-3\cdot54)=4\cdot54-198=4(252-198)-198=4\cdot252-5\cdot198$.
+\item Write $18=\gcd(252,198)$ as a linear combination of 252 and 198.\\
+\emph{Solution.} $18=54-36=54-(198-3\cdot54)=4\cdot54-198=4(252-198)-198=4\cdot252-5\cdot198$.
 \item Find $17^{-1}\bmod 60$.\\
-\emph{Sol.} $60=3\cdot17+9$, $17=1\cdot9+8$, $9=1\cdot8+1$. Back-substituting: $1=9-8=9-(17-9)=2\cdot9-17=2(60-3\cdot17)-17=2\cdot60-7\cdot17$. So $17^{-1}\equiv-7\equiv53$. Check: $17\cdot53=901=15\cdot60+1$.
-\item Prove that if $\gcd(a,b)=1$ then $\gcd(a+b,b)=1$.\\
-\emph{Sol.} $sa+tb=1\Rightarrow s(a+b)+(t-s)b=1$.
-\item Does $15$ have an inverse mod $42$? \emph{Sol.} No, because $\gcd(15,42)=3\neq1$.
+\emph{Solution.} $60=3\cdot17+9$, $17=1\cdot9+8$ and $9=1\cdot8+1$. Working back up, $1=9-8=9-(17-9)=2\cdot9-17=2(60-3\cdot17)-17=2\cdot60-7\cdot17$. So $17^{-1}\equiv-7\equiv53$, and indeed $17\cdot53=901=15\cdot60+1$.
+\item Show that if $\gcd(a,b)=1$ then $\gcd(a+b,b)=1$.\\
+\emph{Solution.} From $sa+tb=1$ we get $s(a+b)+(t-s)b=1$.
+\item Does $15$ have an inverse mod $42$?\\
+\emph{Solution.} No, because $\gcd(15,42)=3\neq1$.
 \end{enumerate}
 
 \newpage
 %======================================================================
-\section{Module 3: Congruences, the CRT, Fermat and Wilson}
+\section{Module 3. Congruences, the CRT, Fermat and Wilson}
 %======================================================================
 
 \subsection{The congruence relation}
 
 \begin{definition}
-$a\equiv b\md m\iff m\mid(a-b)\iff a\bmod m=b\bmod m$.
+$a\equiv b\md m$ means $m\mid(a-b)$, or equivalently $a\bmod m=b\bmod m$.
 \end{definition}
 
 \begin{intuition}
-It's clock arithmetic: on a clock with $m$ hours, $a$ and $b$ show the same hour. Visually, coil the number line into a spring with $m$ positions per turn. Numbers that end up stacked on top of each other are congruent, and each ``column'' of the spring is a \textbf{class} $[r]_m=\{r+km : k\in\Z\}$.
+This is clock arithmetic. On a clock with $m$ hours, $a$ and $b$ point to the same hour. You can also picture coiling the number line into a spring with $m$ positions per turn. Numbers that end up stacked above one another are congruent, and each column of the spring is a \textbf{class} $[r]_m=\{r+km : k\in\Z\}$.
 \end{intuition}
 
 \begin{theorem}
-$\equiv\md m$ is an equivalence relation and splits $\Z$ into exactly $m$ classes $[0],[1],\dots,[m-1]$.
+Congruence mod $m$ is an equivalence relation, and it splits $\Z$ into exactly $m$ classes $[0],[1],\dots,[m-1]$.
 \end{theorem}
 \begin{proof}
-\emph{Reflexive:} $m\mid 0$. \emph{Symmetric:} $m\mid a-b\Rightarrow m\mid b-a$. \emph{Transitive:} $m\mid a-b$ and $m\mid b-c\Rightarrow m\mid(a-b)+(b-c)=a-c$. There are $m$ classes because, by the division algorithm, each integer has a unique remainder in $\{0,\dots,m-1\}$.
+It is \emph{reflexive} because $m\mid 0$, \emph{symmetric} because $m\mid a-b$ implies $m\mid b-a$, and \emph{transitive} because $m\mid a-b$ and $m\mid b-c$ give $m\mid(a-b)+(b-c)=a-c$. There are $m$ classes because the division algorithm gives each integer exactly one remainder in $\{0,\dots,m-1\}$.
 \end{proof}
 
 \subsection{Algebra of congruences}
 
 \begin{theorem}
-If $a\equiv b$ and $c\equiv d\md m$, then $a+c\equiv b+d$, $ac\equiv bd$, $a^k\equiv b^k$ and $P(a)\equiv P(b)$ for every polynomial $P$ with integer coefficients.
+If $a\equiv b$ and $c\equiv d\md m$, then $a+c\equiv b+d$, $ac\equiv bd$, $a^k\equiv b^k$, and $P(a)\equiv P(b)$ for any polynomial $P$ with integer coefficients.
 \end{theorem}
 \begin{proof}
-Sums: $(a+c)-(b+d)=(a-b)+(c-d)$. Products, with the \emph{add and subtract} trick: $ac-bd=ac-bc+bc-bd=c(a-b)+b(c-d)$, and $m$ divides both terms. Powers follow by induction from products, and polynomials by combining sums and products.
+For sums, $(a+c)-(b+d)=(a-b)+(c-d)$. For products we \emph{add and subtract} the same term, $ac-bd=ac-bc+bc-bd=c(a-b)+b(c-d)$, and $m$ divides both parts. Powers follow from products by induction, and polynomials are built from sums and products.
 \end{proof}
 
-\textbf{In practice:} you can reduce mod $m$ \emph{at any point} in a computation with sums, products and powers. For example, $27\equiv 9\cdot3\equiv 4\cdot 3=12\equiv 2\md 5$.
+\textbf{In practice} you can reduce mod $m$ \emph{at any point} in a calculation made of sums, products and powers. For example, $27\equiv 9\cdot3\equiv 4\cdot 3=12\equiv 2\md 5$.
 
 \begin{question}
-Adding, multiplying and raising to powers always work. What about \emph{dividing}?
+Adding, multiplying and taking powers always work. What about \emph{dividing}?
 \end{question}
 
 \begin{theorem}[Cancellation]
-$ac\equiv bc\md m\ \Longrightarrow\ a\equiv b\md{\dfrac{m}{\gcd(c,m)}}$. In particular, if $\gcd(c,m)=1$ you can cancel without changing the modulus.
+If $ac\equiv bc\md m$, then $a\equiv b\md{\dfrac{m}{\gcd(c,m)}}$. In particular, when $\gcd(c,m)=1$ you can cancel $c$ and keep the same modulus.
 \end{theorem}
 \begin{proof}
-Let $g=\gcd(c,m)$, with $c=gc'$, $m=gm'$ and $\gcd(c',m')=1$. We have $m\mid c(a-b)$, that is, $gm'\mid gc'(a-b)$, so $m'\mid c'(a-b)$. Since $\gcd(m',c')=1$, by the coprime divisibility lemma $m'\mid a-b$.
+Let $g=\gcd(c,m)$ and write $c=gc'$ and $m=gm'$, so that $\gcd(c',m')=1$. The hypothesis says $m\mid c(a-b)$, that is, $gm'\mid gc'(a-b)$, so $m'\mid c'(a-b)$. Since $m'$ and $c'$ are coprime, the coprime divisibility lemma gives $m'\mid a-b$.
 \end{proof}
 
 \begin{mistake}
-$4x\equiv4y\md 6$ does \textbf{not} imply $x\equiv y\md6$. Counterexample: $x=0$, $y=3$. Then $0\equiv12\md 6$ but $0\not\equiv3\md6$. The correct conclusion is $x\equiv y\md 3$, because $6/\gcd(4,6)=3$.
+$4x\equiv4y\md 6$ does \textbf{not} imply $x\equiv y\md6$. Try $x=0$ and $y=3$. Then $0\equiv12\md 6$, but $0\not\equiv3\md6$. The correct conclusion is $x\equiv y\md 3$, because $6/\gcd(4,6)=3$.
 \end{mistake}
 
 \subsection{Linear congruences $ax\equiv b\md m$}
 
 \begin{theorem}
-Let $d=\gcd(a,m)$. The congruence $ax\equiv b\md m$ has a solution $\iff d\mid b$. In that case it has \textbf{exactly $d$} solutions that are incongruent mod $m$:
+Let $d=\gcd(a,m)$. The congruence $ax\equiv b\md m$ has a solution if and only if $d\mid b$. When it does, it has \textbf{exactly $d$} solutions that are different mod $m$, namely
 \[
 x\equiv x_0+k\cdot\tfrac{m}{d}\md m,\qquad k=0,1,\dots,d-1,
 \]
 where $x_0$ solves $\tfrac ad x\equiv\tfrac bd\md{\tfrac md}$.
 \end{theorem}
 \begin{proof}
-\emph{Necessity:} if $ax-b=mk$, then $b=ax-mk$, and $d$ divides $a$ and $m$, so $d\mid b$.
+\emph{Necessity.} If $ax-b=mk$, then $b=ax-mk$, and $d$ divides both $a$ and $m$, so $d\mid b$.
 
-\emph{Sufficiency:} if $d\mid b$, divide everything by $d$: $a'x\equiv b'\md{m'}$ with $a'=a/d$, $b'=b/d$, $m'=m/d$ and $\gcd(a',m')=1$. Then $a'$ has an inverse and $x_0\equiv (a')^{-1}b'\md{m'}$. The solutions mod $m'$ are $x_0+km'$. Mod $m=dm'$, the values $k=0,\dots,d-1$ give distinct remainders (they're less than $m$ apart), and $k=d$ comes back to $x_0$.
+\emph{Sufficiency.} If $d\mid b$, divide everything by $d$ to get $a'x\equiv b'\md{m'}$ with $a'=a/d$, $b'=b/d$, $m'=m/d$ and $\gcd(a',m')=1$. Now $a'$ has an inverse and $x_0\equiv (a')^{-1}b'\md{m'}$, so the solutions mod $m'$ are $x_0+km'$. Mod $m=dm'$, the values $k=0,\dots,d-1$ give different remainders, since they're less than $m$ apart, and $k=d$ brings you back to $x_0$.
 \end{proof}
 
 \begin{intuition}
-If $d>1$, the ``orbit'' $\{ax \bmod m\}$ only visits multiples of $d$, and visits each of them $d$ times. If $b$ isn't a multiple of $d$, you never reach it. If it is, you reach it $d$ times.
+When $d>1$, the values $ax \bmod m$ only ever land on multiples of $d$, and they land on each one $d$ times. If $b$ isn't a multiple of $d$ you never reach it, and if it is, you reach it $d$ times.
 \end{intuition}
 
 \begin{example}[$55x\equiv13\md{89}$]
-$\gcd(55,89)=1$, so there is a single solution. Multiply by $55^{-1}\equiv34$: $x\equiv13\cdot34=442=4\cdot89+86$, so $x\equiv86\md{89}$. Check: $55\cdot86=4730=53\cdot89+13$.
+Since $\gcd(55,89)=1$ there is exactly one solution. Multiplying by $55^{-1}\equiv34$ gives $x\equiv13\cdot34=442=4\cdot89+86$, so $x\equiv86\md{89}$. As a check, $55\cdot86=4730=53\cdot89+13$.
 \end{example}
 
-\begin{example}[With $d>1$: $6x\equiv9\md{15}$]
-$d=\gcd(6,15)=3$ and $3\mid9$, so there are 3 solutions. Dividing by 3: $2x\equiv3\md5$. Since $2^{-1}\equiv3\md 5$, $x_0\equiv9\equiv4\md5$. The solutions mod 15 are $4,\,9,\,14$. Check: $24,54,84$ all leave remainder $9$ when divided by $15$.
+\begin{example}[A case with $d>1$, $6x\equiv9\md{15}$]
+Here $d=\gcd(6,15)=3$ and $3\mid9$, so there are 3 solutions. Dividing by 3 gives $2x\equiv3\md5$. Since $2^{-1}\equiv3\md 5$, $x_0\equiv9\equiv4\md5$, and the solutions mod 15 are $4$, $9$ and $14$. Indeed $24$, $54$ and $84$ all leave remainder $9$ when divided by $15$.
 \end{example}
 
 \subsection{The Chinese Remainder Theorem}
@@ -523,31 +524,31 @@ If I know the remainder of $x$ mod $3$ and mod $5$, do I know $x$ mod $15$?
 \end{question}
 
 \begin{intuition}
-Place the numbers $0,\dots,14$ on a $3\times5$ grid, each in row $x\bmod3$ and column $x\bmod 5$. Going up by one moves you down a row and over a column, diagonally, wrapping around the edges. Since $3$ and $5$ are coprime, the diagonal \emph{visits all 15 cells without repeating}. So each pair (remainder mod 3, remainder mod 5) corresponds to exactly one number mod 15. With $2\times4$ (not coprime) the diagonal closes after only $\lcm(2,4)=4$ steps and leaves cells empty: some systems have no solution. This grid is the central animation of module 3.
+Place the numbers $0,\dots,14$ on a $3\times5$ grid, each one in row $x\bmod3$ and column $x\bmod 5$. Counting up by one moves you down a row and across a column, diagonally, wrapping around at the edges. Since $3$ and $5$ are coprime, the diagonal \emph{passes through all 15 cells without repeating}, so each pair of remainders matches exactly one number mod 15. On a $2\times4$ grid, where the moduli aren't coprime, the diagonal closes up after only $\lcm(2,4)=4$ steps and leaves cells empty, so some systems have no solution. This grid is the main animation in module 3.
 \end{intuition}
 
 \begin{theorem}[CRT]
-If $m_1,\dots,m_n$ are pairwise coprime, the system $x\equiv a_i\md{m_i}$ ($i=1,\dots,n$) has a unique solution modulo $M=m_1\cdots m_n$.
+If $m_1,\dots,m_n$ are pairwise coprime, the system $x\equiv a_i\md{m_i}$ for $i=1,\dots,n$ has a unique solution modulo $M=m_1\cdots m_n$.
 \end{theorem}
 
 \begin{proof}
-\emph{Existence (construction).} Let $M_i=M/m_i$. Since $M_i$ is a product of moduli coprime to $m_i$, we have $\gcd(M_i,m_i)=1$ (by the gcd-with-a-product lemma, applied repeatedly). So $y_i=M_i^{-1}\bmod m_i$ exists. Let
+\emph{Existence, by construction.} Let $M_i=M/m_i$. $M_i$ is a product of moduli that are coprime to $m_i$, so $\gcd(M_i,m_i)=1$ by the gcd-of-a-product lemma used a few times. That means $y_i=M_i^{-1}\bmod m_i$ exists. Now set
 \[ x=\sum_{i=1}^n a_iM_iy_i. \]
-Mod $m_j$: if $i\ne j$, $m_j\mid M_i$ and that term is $\equiv0$. The $j$-th term gives $a_jM_jy_j\equiv a_j\cdot1$. So $x\equiv a_j\md{m_j}$ for every $j$.
+Mod $m_j$, every term with $i\ne j$ vanishes because $m_j\mid M_i$, and the $j$-th term is $a_jM_jy_j\equiv a_j\cdot1$. So $x\equiv a_j\md{m_j}$ for every $j$.
 
-\emph{Uniqueness.} If $x$ and $x'$ are solutions, $m_i\mid x-x'$ for every $i$. By the coprime divisors lemma, applied repeatedly, $M\mid x-x'$.
+\emph{Uniqueness.} If $x$ and $x'$ are both solutions, every $m_i$ divides $x-x'$. Applying the coprime divisors lemma repeatedly, $M\mid x-x'$.
 \end{proof}
 
 \begin{intuition}
-Each term $C_i=M_iy_i$ is a ``switch'': it is $1$ mod $m_i$ and $0$ mod all the others. The solution is the sum of the remainders, each one multiplied by its switch.
+Think of each term $C_i=M_iy_i$ as a switch. It is $1$ mod $m_i$ and $0$ mod every other modulus. The solution adds up the remainders, each one multiplied by its own switch.
 \end{intuition}
 
 \begin{example}[By substitution]
-$x\equiv5\md{55}$, $x\equiv10\md{89}$. From the first equation, $x=55k+5$. In the second, $55k\equiv5\md{89}$, so $k\equiv5\cdot34=170\equiv81\md{89}$. With $k=89q+81$: $x=55(89q+81)+5=4895q+4460$. So $x\equiv4460\md{4895}$.
+Solve $x\equiv5\md{55}$ and $x\equiv10\md{89}$. The first equation gives $x=55k+5$. Putting that into the second gives $55k\equiv5\md{89}$, so $k\equiv5\cdot34=170\equiv81\md{89}$. With $k=89q+81$ we get $x=55(89q+81)+5=4895q+4460$, so $x\equiv4460\md{4895}$.
 \end{example}
 
 \begin{example}[With the formula]
-$2x\equiv1\md5$, $x\equiv-1\md7$, $x\equiv4\md9$, $3x\equiv2\md{11}$. \textbf{First solve each one for $x$:} $2^{-1}\equiv3\md 5$, so $x\equiv3$. $-1\equiv6\md7$. $3^{-1}\equiv4\md{11}$, so $x\equiv8$. The system becomes $x\equiv3,6,4,8$ mod $5,7,9,11$, with $M=3465$:
+Solve $2x\equiv1\md5$, $x\equiv-1\md7$, $x\equiv4\md9$ and $3x\equiv2\md{11}$. \textbf{Start by solving each one for $x$.} Since $2^{-1}\equiv3\md 5$ the first becomes $x\equiv3$, the second is $x\equiv6\md7$, and since $3^{-1}\equiv4\md{11}$ the last becomes $x\equiv8$. The system is now $x\equiv3,6,4,8$ mod $5,7,9,11$, with $M=3465$.
 \begin{center}
 \begin{tabular}{ccccc}
 \toprule
@@ -561,26 +562,26 @@ $m_i$ & $a_i$ & $M_i$ & $M_i\bmod m_i$ & $y_i=M_i^{-1}$\\
 \end{tabular}
 \end{center}
 $x\equiv3\cdot693\cdot2+6\cdot495\cdot3+4\cdot385\cdot4+8\cdot315\cdot8=4158+8910+6160+20160=39388\equiv1273\md{3465}$.
-Check: $1273=5\cdot254+3=7\cdot181+6=9\cdot141+4=11\cdot115+8$.
+As a check, $1273=5\cdot254+3=7\cdot181+6=9\cdot141+4=11\cdot115+8$.
 \end{example}
 
 \begin{example}[Moduli that are \emph{not} coprime]
-When the moduli share factors, \textbf{split each equation into prime powers} (the CRT used backwards):
+When the moduli share factors, \textbf{split each equation into prime powers}, which is the CRT used in reverse.
 \begin{itemize}
-\item $\{x\equiv7\md{10},\ x\equiv4\md{35}\}$ gives $x\equiv1\md2$, $x\equiv2\md5$, $x\equiv4\md5$, $x\equiv4\md7$. There are two contradictory conditions mod 5, so \textbf{there is no solution}.
-\item $\{x\equiv7\md{10},\ x\equiv2\md{35}\}$ gives $x\equiv1\md2$, $x\equiv2\md5$ (which appears twice, without conflict) and $x\equiv2\md7$. With the CRT and $M=70$: $C_1=35\cdot1$, $C_2=14\cdot4=56$, $C_3=10\cdot5=50$. So $x\equiv35+2\cdot56+2\cdot50=247\equiv37\md{70}$.
+\item $\{x\equiv7\md{10},\ x\equiv4\md{35}\}$ turns into $x\equiv1\md2$, $x\equiv2\md5$, $x\equiv4\md5$ and $x\equiv4\md7$. The two conditions mod 5 contradict each other, so \textbf{there is no solution}.
+\item $\{x\equiv7\md{10},\ x\equiv2\md{35}\}$ turns into $x\equiv1\md2$, $x\equiv2\md5$, which shows up twice but agrees, and $x\equiv2\md7$. With the CRT and $M=70$ the switches are $C_1=35\cdot1$, $C_2=14\cdot4=56$ and $C_3=10\cdot5=50$, so $x\equiv35+2\cdot56+2\cdot50=247\equiv37\md{70}$.
 \end{itemize}
-General rule: $x\equiv a\md m$, $x\equiv b\md n$ has a solution $\iff\gcd(m,n)\mid a-b$, and it is unique mod $\lcm(m,n)$, not mod $mn$.
+In general, $x\equiv a\md m$ and $x\equiv b\md n$ can be solved together exactly when $\gcd(m,n)\mid a-b$, and the solution is unique mod $\lcm(m,n)$, not mod $mn$.
 \end{example}
 
 \begin{sketch}
-\textbf{CRT:} (1) $\gcd(M_i,m_i)=1$, so $y_i$ exists; (2) $C_i\equiv1\md{m_i}$ and $C_i\equiv0$ for the other moduli; (3) add up $\sum a_iC_i$; (4) uniqueness: if every $m_i$ divides $x-x'$, so does their product.
+For the CRT, (1) $\gcd(M_i,m_i)=1$, so $y_i$ exists, (2) $C_i\equiv1\md{m_i}$ and $C_i\equiv0$ for every other modulus, (3) add up $\sum a_iC_i$, and (4) for uniqueness, if every $m_i$ divides $x-x'$ then so does their product.
 \end{sketch}
 
 \subsection{Fermat's Little Theorem}
 
 \begin{question}
-How do you compute $2^{1000005}\bmod101$ without a million multiplications?
+How do you compute $2^{1000005}\bmod101$ without doing a million multiplications?
 \end{question}
 
 \begin{theorem}[FLT]
@@ -588,110 +589,110 @@ If $p$ is prime and $p\nmid a$, then $a^{p-1}\equiv1\md p$. For every $a\in\Z$, 
 \end{theorem}
 
 \begin{intuition}
-Multiplying by $a$ \emph{shuffles} the remainders $1,2,\dots,p-1$ without repeating or losing any. With $p=7$ and $a=3$: $3,6,2,5,1,4$ are the same six numbers in a different order. If you multiply them all, the product is the same before and after the shuffle, but after the shuffle there is an extra factor $a^{p-1}$.
+Multiplying by $a$ \emph{shuffles} the remainders $1,2,\dots,p-1$ without repeating or losing any of them. With $p=7$ and $a=3$ you get $3,6,2,5,1,4$, the same six numbers in a different order. The product of all of them is the same before and after the shuffle, but after the shuffle it contains an extra factor of $a^{p-1}$.
 \end{intuition}
 
 \begin{proof}
-Consider $a,2a,\dots,(p-1)a$ mod $p$.
+Look at $a,2a,\dots,(p-1)a$ mod $p$.
 \begin{itemize}
-\item None is $\equiv0$: if $p\mid ka$ with $p\nmid a$, by Euclid's lemma $p\mid k$, which is impossible since $1\le k\le p-1$.
-\item They are distinct: if $ia\equiv ja$, cancel $a$ (because $\gcd(a,p)=1$) and get $i\equiv j$.
+\item None of them is $\equiv0$. If $p\mid ka$ with $p\nmid a$, Euclid's lemma gives $p\mid k$, which can't happen for $1\le k\le p-1$.
+\item They're all different. If $ia\equiv ja$, we can cancel $a$ since $\gcd(a,p)=1$, which gives $i\equiv j$.
 \end{itemize}
-They are $p-1$ distinct nonzero remainders, so they are $1,\dots,p-1$ in some order. Multiplying everything:
+So they are $p-1$ different nonzero remainders, which means they are $1,\dots,p-1$ in some order. Multiplying them all together,
 \[
 a^{p-1}(p-1)!\equiv(p-1)!\md p.
 \]
-Since $\gcd((p-1)!,p)=1$, cancel it and $a^{p-1}\equiv1$ is left. For the second form: if $p\nmid a$ multiply by $a$, and if $p\mid a$ both sides are $\equiv0$.
+Since $\gcd((p-1)!,p)=1$, the factorial cancels and $a^{p-1}\equiv1$. For the second form, multiply by $a$ when $p\nmid a$, and when $p\mid a$ both sides are $\equiv0$.
 \end{proof}
 
-\textbf{Strategy for huge exponents.} Divide the exponent by $p-1$: $E=q(p-1)+r$, and then $a^E=(a^{p-1})^q a^r\equiv a^r\md p$. \emph{The exponent lives mod $p-1$.}
+\textbf{Handling huge exponents.} Divide the exponent by $p-1$ to get $E=q(p-1)+r$. Then $a^E=(a^{p-1})^q a^r\equiv a^r\md p$. In other words, \emph{the exponent only matters mod $p-1$}.
 
 \begin{example}
-$2^{1000005}\bmod101$. Since $101$ is prime and $101\nmid2$, $2^{100}\equiv1$. Also $1000005=100\cdot10000+5$, so $2^{1000005}\equiv2^5=32\md{101}$.
+For $2^{1000005}\bmod101$, note that $101$ is prime and doesn't divide 2, so $2^{100}\equiv1$. Since $1000005=100\cdot10000+5$, we get $2^{1000005}\equiv2^5=32\md{101}$.
 \end{example}
 
-\begin{example}[An inverse via Fermat]
-$7^{22}\equiv1\md{23}$, so $7\cdot7^{21}\equiv1$ and $7^{-1}\equiv7^{21}$. By repeated squaring: $7^2=49\equiv3$, $7^4\equiv9$, $7^8\equiv81\equiv12$, $7^{16}\equiv144\equiv6$. Since $21=16+4+1$: $7^{21}\equiv6\cdot9\cdot7=378=16\cdot23+10\equiv10$. Check: $7\cdot10=70=3\cdot23+1$.
+\begin{example}[An inverse from Fermat]
+$7^{22}\equiv1\md{23}$, so $7\cdot7^{21}\equiv1$ and $7^{-1}\equiv7^{21}$. Repeated squaring gives $7^2=49\equiv3$, $7^4\equiv9$, $7^8\equiv81\equiv12$ and $7^{16}\equiv144\equiv6$. Since $21=16+4+1$, $7^{21}\equiv6\cdot9\cdot7=378=16\cdot23+10\equiv10$. As a check, $7\cdot10=70=3\cdot23+1$.
 \end{example}
 
 \begin{mistake}
-Fermat \textbf{only} holds for a prime modulus. For $a^{12}\bmod15$ the exponent $14$ is useless. Use Euler ($\varphi(15)=8$) or the CRT with moduli 3 and 5.
+Fermat \textbf{only} works for a prime modulus. For $a^{12}\bmod15$ the exponent $14$ is meaningless. Use Euler with $\varphi(15)=8$, or the CRT with the moduli 3 and 5.
 \end{mistake}
 
 \begin{counter}
-The converse is false: $2^{340}\equiv1\md{341}$ and $341=11\cdot31$ is not prime (it's a pseudoprime). $a^{n-1}\equiv1$ does not prove that $n$ is prime.
+The converse is false. $2^{340}\equiv1\md{341}$, but $341=11\cdot31$ isn't prime, which makes it a pseudoprime. Having $a^{n-1}\equiv1$ does not prove that $n$ is prime.
 \end{counter}
 
 \subsection{Wilson's Theorem}
 
 \begin{theorem}[Wilson]
-$n>1$ is prime $\iff (n-1)!\equiv-1\md n$.
+An integer $n>1$ is prime if and only if $(n-1)!\equiv-1\md n$.
 \end{theorem}
 
 \begin{intuition}
-In $\{1,\dots,p-1\}$ every number has an inverse, and almost all of them pair up with a \emph{different} number: the pair $a\cdot a^{-1}=1$ cancels from the product. The only numbers that are their own inverse are the solutions of $a^2\equiv1$, that is, $1$ and $p-1$ (see Module 4). So the whole product is $1\cdot(p-1)\equiv-1$. With $p=7$: $6!=1\cdot(2\cdot4)(3\cdot5)\cdot6\equiv1\cdot1\cdot1\cdot6\equiv-1$.
+In $\{1,\dots,p-1\}$ every number has an inverse, and almost all of them pair up with a \emph{different} number. Each pair $a\cdot a^{-1}=1$ cancels out of the product. The only numbers that are their own inverse are the solutions of $a^2\equiv1$, which are $1$ and $p-1$ (see Module 4). So the whole product is $1\cdot(p-1)\equiv-1$. For $p=7$ this reads $6!=1\cdot(2\cdot4)(3\cdot5)\cdot6\equiv1\cdot1\cdot1\cdot6\equiv-1$.
 \end{intuition}
 
 \begin{proof}
-($\Rightarrow$) For $p=2$: $1!\equiv-1\md2$. For odd $p$: every $a\in\{2,\dots,p-2\}$ has an inverse $a^{-1}\ne a$, because $a^2\equiv1\iff p\mid(a-1)(a+1)\iff a\equiv\pm1$ by Euclid's lemma. So $\{2,\dots,p-2\}$ splits into pairs whose product is $1$, and then $(p-1)!\equiv1\cdot1\cdots1\cdot(p-1)\equiv-1$.
+First suppose $p$ is prime. For $p=2$ we have $1!\equiv-1\md2$. For odd $p$, each $a\in\{2,\dots,p-2\}$ has an inverse different from itself, because $a^2\equiv1$ means $p\mid(a-1)(a+1)$, and by Euclid's lemma that forces $a\equiv\pm1$. So $\{2,\dots,p-2\}$ splits into pairs with product $1$, and $(p-1)!\equiv1\cdot1\cdots1\cdot(p-1)\equiv-1$.
 
-($\Leftarrow$) If $n=ab$ with $1<a<n$, then $a\mid(n-1)!$. If $(n-1)!\equiv-1\md n$, since $a\mid n$ also $(n-1)!\equiv-1\md a$, and then $a\mid 1$. Contradiction.
+Now suppose $n=ab$ with $1<a<n$. Then $a\mid(n-1)!$. If $(n-1)!\equiv-1\md n$ held, then since $a\mid n$ we would also have $(n-1)!\equiv-1\md a$, and so $a\mid 1$, which is impossible.
 \end{proof}
 
 \begin{example}
-With $p=101$: $100!\equiv-1\equiv100$. Since $100!=100\cdot99!$ and $100\equiv-1$: $-99!\equiv-1$, so $99!\equiv1$. Since $99!=99\cdot98!$ and $99\equiv-2$: $-2\cdot98!\equiv1$, that is, $2\cdot98!\equiv-1\equiv100$, and so $98!\equiv50\md{101}$. Check: $2\cdot50=100\equiv-1$.
+With $p=101$, Wilson gives $100!\equiv-1\equiv100$. Since $100!=100\cdot99!$ and $100\equiv-1$, we get $-99!\equiv-1$, so $99!\equiv1$. Since $99!=99\cdot98!$ and $99\equiv-2$, we get $-2\cdot98!\equiv1$, that is, $2\cdot98!\equiv-1\equiv100$, and so $98!\equiv50\md{101}$. As a check, $2\cdot50=100\equiv-1$.
 \end{example}
 
 \begin{thumbrule}
-A factorial mod a prime $p$? Wilson for $(p-1)!$, then peel off factors by writing them as $-1,-2,\dots$
+For a factorial mod a prime $p$, start from Wilson's $(p-1)!$ and peel off the extra factors by writing them as $-1,-2,\dots$
 \end{thumbrule}
 
 \subsection*{Module 3 exercises}
 \begin{enumerate}[label=\textbf{3.\arabic*}]
 \item Solve $8x\equiv12\md{20}$.\\
-\emph{Sol.} $d=4\mid12$, so there are 4 solutions. Dividing: $2x\equiv3\md5$, so $x\equiv4\md5$. The solutions are $4,9,14,19\md{20}$.
-\item Solve $x\equiv2\md3$, $x\equiv3\md5$, $x\equiv2\md7$.\\
-\emph{Sol.} $M=105$. $C_1=35\cdot(35^{-1}\bmod3)=35\cdot2=70$, $C_2=21\cdot(21^{-1}\bmod5)=21\cdot1=21$, $C_3=15\cdot(15^{-1}\bmod7)=15\cdot1=15$. So $x\equiv140+63+30=233\equiv23\md{105}$.
+\emph{Solution.} $d=4$ divides 12, so there are 4 solutions. Dividing by 4 gives $2x\equiv3\md5$, so $x\equiv4\md5$, and the solutions are $4,9,14,19\md{20}$.
+\item Solve $x\equiv2\md3$, $x\equiv3\md5$ and $x\equiv2\md7$.\\
+\emph{Solution.} $M=105$, with $C_1=35\cdot(35^{-1}\bmod3)=35\cdot2=70$, $C_2=21\cdot(21^{-1}\bmod5)=21\cdot1=21$ and $C_3=15\cdot(15^{-1}\bmod7)=15\cdot1=15$. So $x\equiv140+63+30=233\equiv23\md{105}$.
 \item Compute $3^{100}\bmod7$.\\
-\emph{Sol.} $3^6\equiv1$ and $100=6\cdot16+4$, so $3^{100}\equiv3^4=81\equiv4$.
+\emph{Solution.} $3^6\equiv1$ and $100=6\cdot16+4$, so $3^{100}\equiv3^4=81\equiv4$.
 \item Compute $15!\bmod17$.\\
-\emph{Sol.} $16!\equiv-1$ and $16\equiv-1$, so $-15!\equiv-1$ and $15!\equiv1$.
-\item Does $\{x\equiv3\md6,\ x\equiv5\md{8}\}$ have a solution?\\
-\emph{Sol.} $\gcd(6,8)=2\mid5-3=2$, so yes. The solutions are the odd numbers that are $\equiv3\md6$ and $\equiv5\md 8$: $x\equiv21\md{24}$.
+\emph{Solution.} $16!\equiv-1$ and $16\equiv-1$, so $-15!\equiv-1$ and $15!\equiv1$.
+\item Can $x\equiv3\md6$ and $x\equiv5\md{8}$ hold at the same time?\\
+\emph{Solution.} Yes, because $\gcd(6,8)=2$ divides $5-3=2$. The solutions are the numbers that are $3\bmod6$ and $5\bmod 8$, which is $x\equiv21\md{24}$.
 \end{enumerate}
 
 \newpage
 %======================================================================
-\section{Module 4: Euler's $\varphi$ function, Euler's Theorem and RSA}
+\section{Module 4. Euler's $\varphi$ function, Euler's Theorem and RSA}
 %======================================================================
 
 \subsection{The $\varphi$ function}
 
 \begin{definition}
-$\varphi(n)=\big|\{x : 1\le x\le n,\ \gcd(x,n)=1\}\big|$, that is, how many remainders have an inverse mod $n$.
+$\varphi(n)=\big|\{x : 1\le x\le n,\ \gcd(x,n)=1\}\big|$, the number of remainders that have an inverse mod $n$.
 \end{definition}
 
-\begin{theorem}[Formulas]
+\begin{theorem}[Formulas for $\varphi$]
 \begin{enumerate}
-\item $\varphi(p)=p-1$ if $p$ is prime.
+\item $\varphi(p)=p-1$ when $p$ is prime.
 \item $\varphi(p^k)=p^k-p^{k-1}=p^k\left(1-\tfrac1p\right)$.
-\item If $\gcd(m,n)=1$: $\varphi(mn)=\varphi(m)\varphi(n)$.
-\item If $n=p_1^{a_1}\cdots p_k^{a_k}$: $\varphi(n)=n\prod_{i}\left(1-\tfrac1{p_i}\right)$.
+\item If $\gcd(m,n)=1$, then $\varphi(mn)=\varphi(m)\varphi(n)$.
+\item If $n=p_1^{a_1}\cdots p_k^{a_k}$, then $\varphi(n)=n\prod_{i}\left(1-\tfrac1{p_i}\right)$.
 \end{enumerate}
 \end{theorem}
 \begin{proof}
 (1) Every number from $1$ to $p-1$ is coprime to $p$.
-(2) $\gcd(x,p^k)\ne1\iff p\mid x$. Between $1$ and $p^k$ there are $p^{k-1}$ multiples of $p$, and those are subtracted.
-(3) By the CRT, $x\bmod mn\leftrightarrow(x\bmod m,\,x\bmod n)$ is a bijection. Also $\gcd(x,mn)=1\iff\gcd(x,m)=1$ and $\gcd(x,n)=1$. So the invertible remainders mod $mn$ correspond to the pairs (invertible mod $m$, invertible mod $n$), and there are $\varphi(m)\varphi(n)$ of those. On the CRT grid they're the cells that are in a ``good'' row and a ``good'' column at the same time.
+(2) $\gcd(x,p^k)\ne1$ exactly when $p\mid x$. Between $1$ and $p^k$ there are $p^{k-1}$ multiples of $p$, and those are the ones we subtract.
+(3) By the CRT, $x\bmod mn\leftrightarrow(x\bmod m,\,x\bmod n)$ is a bijection, and $\gcd(x,mn)=1$ exactly when $\gcd(x,m)=1$ and $\gcd(x,n)=1$. So the invertible remainders mod $mn$ match the pairs made of an invertible remainder mod $m$ and one mod $n$, and there are $\varphi(m)\varphi(n)$ such pairs. On the CRT grid these are the cells that lie in a good row and a good column at the same time.
 (4) Combine (2) and (3).
 \end{proof}
 
 \begin{example}
-$\varphi(119)=\varphi(7)\varphi(17)=6\cdot16=96$. $\varphi(1000)=\varphi(2^3)\varphi(5^3)=4\cdot100=400$. $\varphi(360)=360\cdot\frac12\cdot\frac23\cdot\frac45=96$.
+$\varphi(119)=\varphi(7)\varphi(17)=6\cdot16=96$, $\varphi(1000)=\varphi(2^3)\varphi(5^3)=4\cdot100=400$, and $\varphi(360)=360\cdot\frac12\cdot\frac23\cdot\frac45=96$.
 \end{example}
 
 \begin{mistake}
-$\varphi(mn)=\varphi(m)\varphi(n)$ \textbf{only} when they are coprime: $\varphi(4)=2\ne\varphi(2)^2=1$.
+$\varphi(mn)=\varphi(m)\varphi(n)$ holds \textbf{only} for coprime $m$ and $n$. Already $\varphi(4)=2$ while $\varphi(2)^2=1$.
 \end{mistake}
 
 \subsection{Euler's Theorem}
@@ -700,102 +701,102 @@ $\varphi(mn)=\varphi(m)\varphi(n)$ \textbf{only} when they are coprime: $\varphi
 If $\gcd(a,n)=1$, then $a^{\varphi(n)}\equiv1\md n$.
 \end{theorem}
 \begin{proof}
-It's Fermat's proof, but using only the invertible remainders. Let $r_1,\dots,r_{\varphi(n)}$ be the remainders coprime to $n$. The products $ar_1,\dots,ar_{\varphi(n)}$ are still coprime to $n$ (by the gcd-with-a-product lemma) and are distinct (you can cancel $a$). So they are the same $r_i$ in a different order. Multiplying everything: $a^{\varphi(n)}\prod r_i\equiv\prod r_i$, and $\prod r_i$, which is invertible, cancels. Fermat is the case $n=p$.
+This is Fermat's proof again, using only the invertible remainders. Let $r_1,\dots,r_{\varphi(n)}$ be the remainders coprime to $n$. The products $ar_1,\dots,ar_{\varphi(n)}$ are still coprime to $n$, by the gcd-of-a-product lemma, and they're all different, since $a$ can be cancelled. So they are the same $r_i$ in a new order. Multiplying everything gives $a^{\varphi(n)}\prod r_i\equiv\prod r_i$, and since $\prod r_i$ is invertible it cancels. Fermat is the special case $n=p$.
 \end{proof}
 
-\textbf{Strategy:} reduce the exponent mod $\varphi(n)$.
+The practical upshot is that exponents can be reduced mod $\varphi(n)$.
 
 \begin{example}[$2^{118}\bmod119$]
-$\varphi(119)=96$ and $\gcd(2,119)=1$, so $2^{118}=2^{96}\cdot2^{22}\equiv2^{22}$. Next, $2^7=128\equiv9$, $2^{11}=2^7\cdot2^4\equiv9\cdot16=144\equiv25$ and $2^{22}=(2^{11})^2\equiv625=5\cdot119+30\equiv30$. The remainder is $\mathbf{30}$.
+$\varphi(119)=96$ and $\gcd(2,119)=1$, so $2^{118}=2^{96}\cdot2^{22}\equiv2^{22}$. Next, $2^7=128\equiv9$, $2^{11}=2^7\cdot2^4\equiv9\cdot16=144\equiv25$, and $2^{22}=(2^{11})^2\equiv625=5\cdot119+30\equiv30$. The remainder is $\mathbf{30}$.
 \end{example}
 
 \begin{example}[The last three digits of $7^{2407}$]
-The last three digits are the remainder mod 1000. $\varphi(1000)=400$ and $2407=6\cdot400+7$, so $7^{2407}\equiv7^7$. Also $7^4=2401\equiv401$ and $7^3=343$, so $7^7\equiv401\cdot343=137543\equiv543$. The last three digits are $\mathbf{543}$.
+The last three digits of a number are its remainder mod 1000. Since $\varphi(1000)=400$ and $2407=6\cdot400+7$, we have $7^{2407}\equiv7^7$. With $7^4=2401\equiv401$ and $7^3=343$, $7^7\equiv401\cdot343=137543\equiv543$. The last three digits are $\mathbf{543}$.
 \end{example}
 
-\subsection{Self-inverse elements: $a^2\equiv1$}
+\subsection{Self-inverse elements, $a^2\equiv1$}
 
 \begin{question}
-How many remainders are their own inverse? In the reals there are only two, $\pm1$. Is it the same mod $n$?
+How many remainders are their own inverse? Among the real numbers only $\pm1$ are. Is it the same mod $n$?
 \end{question}
 
 \begin{theorem}
 \begin{enumerate}
-\item If $p$ is an odd prime, $a^2\equiv1\md{p^k}$ has exactly 2 solutions, $\pm1$. (We proved it for $p$ above. For $p^k$ the argument is the same, because $p$ can't divide both $a-1$ and $a+1$, since their difference is 2.)
-\item $a^2\equiv1\md{2^n}$ has 1 solution if $n=1$, 2 if $n=2$, and \textbf{4} if $n\ge3$: $\pm1$ and $2^{n-1}\pm1$.
-\item For general $n$, by the CRT, the number of solutions is the product of the numbers of solutions for each prime power.
+\item If $p$ is an odd prime, $a^2\equiv1\md{p^k}$ has exactly 2 solutions, $\pm1$. We proved this for $p$ above, and the same argument works for $p^k$, because $p$ can't divide both $a-1$ and $a+1$ when their difference is 2.
+\item $a^2\equiv1\md{2^n}$ has 1 solution when $n=1$, 2 when $n=2$, and \textbf{4} when $n\ge3$, namely $\pm1$ and $2^{n-1}\pm1$.
+\item For a general $n$, the CRT says the number of solutions is the product of the counts for each prime power.
 \end{enumerate}
 \end{theorem}
 
 \begin{proof}
-(1) $p\mid(a-1)(a+1)$. By Euclid's lemma, $p\mid a-1$ or $p\mid a+1$. So $a\equiv\pm1$, and these are distinct because $p\ne2$.
+(1) $p\mid(a-1)(a+1)$, so by Euclid's lemma $p\mid a-1$ or $p\mid a+1$. That gives $a\equiv\pm1$, and these are different because $p\ne2$.
 
-(2) With $n\ge3$: $a$ must be odd, so $a-1$ and $a+1$ are consecutive even numbers. By $\gcd(x,y)=\gcd(x,y-x)$: $\gcd(a-1,a+1)=\gcd(a-1,2)=2$. So only one of the two factors can have more than one factor of 2, and since the product needs at least $n$ factors of 2, one of them must be divisible by $2^{n-1}$:
+(2) Take $n\ge3$. Then $a$ must be odd, so $a-1$ and $a+1$ are consecutive even numbers. Using $\gcd(x,y)=\gcd(x,y-x)$, $\gcd(a-1,a+1)=\gcd(a-1,2)=2$. So at most one of the two factors has more than one factor of 2, and since their product needs at least $n$ of them, one factor is divisible by $2^{n-1}$.
 \begin{itemize}
-\item $2^{n-1}\mid a-1$: $a\equiv1$ or $a\equiv2^{n-1}+1\md{2^n}$.
-\item $2^{n-1}\mid a+1$: $a\equiv2^{n-1}-1$ or $a\equiv-1\md{2^n}$.
+\item If $2^{n-1}\mid a-1$, then $a\equiv1$ or $a\equiv2^{n-1}+1\md{2^n}$.
+\item If $2^{n-1}\mid a+1$, then $a\equiv2^{n-1}-1$ or $a\equiv-1\md{2^n}$.
 \end{itemize}
-For $n\ge3$ the four values are distinct, and all four work: $(2^{n-1}\pm1)^2=2^{2n-2}\pm2^n+1\equiv1$, because $2n-2\ge n$.
+For $n\ge3$ these four values are different, and all four work, since $(2^{n-1}\pm1)^2=2^{2n-2}\pm2^n+1\equiv1$ when $2n-2\ge n$.
 \end{proof}
 
 \begin{example}[Mod 100]
-$100=4\cdot25$. Mod 4: $a\equiv1,3$. Mod 25: $a\equiv\pm1$. There are $2\cdot2=4$ solutions: $\{1,49,51,99\}$. \textbf{The product of the 40 remainders coprime to 100:} each one that isn't its own inverse cancels with its partner, leaving $1\cdot49\cdot51\cdot99\equiv1\cdot(-51)\cdot51\cdot(-1)=51^2=2601\equiv1\md{100}$. This generalizes Wilson: the product of the invertible elements is $-1$ only when there are exactly two self-inverse elements.
+$100=4\cdot25$. Mod 4 the solutions are $a\equiv1,3$, and mod 25 they're $a\equiv\pm1$, so there are $2\cdot2=4$ solutions, $\{1,49,51,99\}$. Now multiply \textbf{all 40 remainders coprime to 100}. Every one that isn't its own inverse cancels with its partner, which leaves $1\cdot49\cdot51\cdot99\equiv1\cdot(-51)\cdot51\cdot(-1)=51^2=2601\equiv1\md{100}$. This generalizes Wilson, since the product of the invertible elements is $-1$ only when there are exactly two self-inverse elements.
 \end{example}
 
 \begin{example}[Mod 3600]
-$3600=2^4\cdot3^2\cdot5^2$. Mod 16: $\{1,7,9,15\}$. Mod 9: $\{1,8\}$. Mod 25: $\{1,24\}$. Total: $4\cdot2\cdot2=16$. With $C_1=225\cdot1$, $C_2=400\cdot7=2800$ and $C_3=144\cdot4=576$, $a\equiv225r_1+2800r_2+576r_3\md{3600}$ gives:
+$3600=2^4\cdot3^2\cdot5^2$. The solutions are $\{1,7,9,15\}$ mod 16, $\{1,8\}$ mod 9 and $\{1,24\}$ mod 25, for a total of $4\cdot2\cdot2=16$. With $C_1=225\cdot1$, $C_2=400\cdot7=2800$ and $C_3=144\cdot4=576$, the formula $a\equiv225r_1+2800r_2+576r_3\md{3600}$ gives
 \[\{1,199,449,649,1151,1351,1601,1799,1801,1999,2249,2449,2951,3151,3401,3599\}.\]
-(Checked by exhaustive search: these are exactly the $a<3600$ with $a^2\equiv1$.)
+An exhaustive search confirms that these are exactly the $a<3600$ with $a^2\equiv1$.
 \end{example}
 
 \subsection{RSA}
 
 \begin{question}
-How can anyone encrypt a message to me with a public key, so that nobody but me can decrypt it?
+How can anyone send me an encrypted message using a public key, in a way that nobody except me can read it?
 \end{question}
 
-\textbf{Key generation.}
+\textbf{Making the keys.}
 \begin{enumerate}
-\item Pick primes $p,q$. Compute $n=pq$ and $\varphi(n)=(p-1)(q-1)$.
+\item Pick primes $p$ and $q$, and compute $n=pq$ and $\varphi(n)=(p-1)(q-1)$.
 \item Pick $e$ with $1<e<\varphi(n)$ and $\gcd(e,\varphi(n))=1$.
 \item Compute $d\equiv e^{-1}\md{\varphi(n)}$ with extended Euclid.
-\item The public key is $(n,e)$. The private key is $d$, and $p$, $q$ and $\varphi(n)$ are kept secret.
+\item Publish $(n,e)$ as the public key. Keep $d$ as the private key, and keep $p$, $q$ and $\varphi(n)$ secret too.
 \end{enumerate}
-\textbf{Encrypt:} $C=M^e\bmod n$. \textbf{Decrypt:} $M=C^d\bmod n$.
+To \textbf{encrypt} compute $C=M^e\bmod n$, and to \textbf{decrypt} compute $M=C^d\bmod n$.
 
 \begin{theorem}[Why it works]
 If $0\le M<n$, then $(M^e)^d\equiv M\md n$.
 \end{theorem}
 \begin{proof}
-$ed=1+k\varphi(n)=1+k(p-1)(q-1)$. We show $M^{ed}\equiv M\md p$. If $p\mid M$, both sides are $0$. If not, by Fermat $M^{ed}=M\cdot(M^{p-1})^{k(q-1)}\equiv M$. The same holds mod $q$. Since $\gcd(p,q)=1$, by the CRT (uniqueness) $M^{ed}\equiv M\md{pq}$.
+$ed=1+k\varphi(n)=1+k(p-1)(q-1)$ for some $k$. We first show $M^{ed}\equiv M\md p$. If $p\mid M$ both sides are $0$. If not, Fermat gives $M^{ed}=M\cdot(M^{p-1})^{k(q-1)}\equiv M$. The same holds mod $q$, and since $\gcd(p,q)=1$, the uniqueness part of the CRT gives $M^{ed}\equiv M\md{pq}$.
 \end{proof}
 
-\begin{example}[Full RSA with small numbers]
-$p=5$, $q=11$, so $n=55$ and $\varphi(n)=40$. Take $e=3$, with $\gcd(3,40)=1$. Since $40=13\cdot3+1$, $1=40-13\cdot3$ and $d\equiv-13\equiv27\md{40}$. Check: $3\cdot27=81=2\cdot40+1$.
+\begin{example}[RSA from start to finish with small numbers]
+Take $p=5$ and $q=11$, so $n=55$ and $\varphi(n)=40$. Choose $e=3$, which is coprime to 40. Since $40=13\cdot3+1$, we have $1=40-13\cdot3$, so $d\equiv-13\equiv27\md{40}$. As a check, $3\cdot27=81=2\cdot40+1$.
 
-Encrypt $M=7$: $C=7^3=343=6\cdot55+13$, so $C=13$.
+To encrypt $M=7$, compute $C=7^3=343=6\cdot55+13$, so $C=13$.
 
-Decrypt $13^{27}\bmod55$ with the CRT. Mod 5: $13\equiv3$, and $3^{27}=3^{4\cdot6+3}\equiv3^3=27\equiv2$. Mod 11: $13\equiv2$, and $2^{27}=2^{10\cdot2+7}\equiv2^7=128\equiv7$. We need $x\equiv2\md5$, $x\equiv7\md{11}$, and the solution is $x=7$. We get $M=7$ back.
+To decrypt $13^{27}\bmod55$, use the CRT. Mod 5, $13\equiv3$ and $3^{27}=3^{4\cdot6+3}\equiv3^3=27\equiv2$. Mod 11, $13\equiv2$ and $2^{27}=2^{10\cdot2+7}\equiv2^7=128\equiv7$. The number that is $2\bmod5$ and $7\bmod{11}$ is $x=7$, so we get $M=7$ back.
 \end{example}
 
 \begin{mistake}
-$d$ is the inverse of $e$ \textbf{mod $\varphi(n)$, not mod $n$}. The reason is that exponents ``live'' mod $\varphi(n)$ (Euler), while bases live mod $n$.
+$d$ is the inverse of $e$ \textbf{mod $\varphi(n)$, not mod $n$}. Exponents live mod $\varphi(n)$ because of Euler, while bases live mod $n$.
 \end{mistake}
 
 \begin{thumbrule}
-To pick a theorem: is the modulus prime? Fermat (exponent mod $p-1$). Not prime but $\gcd(a,n)=1$? Euler (exponent mod $\varphi(n)$). Can the modulus be factored? The CRT, solving piece by piece. A factorial mod a prime? Wilson.
+If the modulus is prime, use Fermat and reduce the exponent mod $p-1$. If it isn't prime but $\gcd(a,n)=1$, use Euler and reduce mod $\varphi(n)$. If you can factor the modulus, solve piece by piece and combine with the CRT. For a factorial mod a prime, use Wilson.
 \end{thumbrule}
 
 \subsection*{Module 4 exercises}
 \begin{enumerate}[label=\textbf{4.\arabic*}]
-\item Compute the last two digits of $3^{2026}$.\\
-\emph{Sol.} $\varphi(100)=40$ and $2026\equiv26\md{40}$. $3^{5}=243\equiv43$, $3^{10}\equiv43^2=1849\equiv49$, $3^{20}\equiv49^2=2401\equiv1$. So $3^{26}=3^{20}\cdot3^5\cdot3\equiv1\cdot43\cdot3=129\equiv29$. The last two digits are $\mathbf{29}$.
+\item Find the last two digits of $3^{2026}$.\\
+\emph{Solution.} $\varphi(100)=40$ and $2026\equiv26\md{40}$. Then $3^{5}=243\equiv43$, $3^{10}\equiv43^2=1849\equiv49$ and $3^{20}\equiv49^2=2401\equiv1$, so $3^{26}=3^{20}\cdot3^5\cdot3\equiv1\cdot43\cdot3=129\equiv29$. The last two digits are $\mathbf{29}$.
 \item Find every $a$ with $a^2\equiv1\md{15}$.\\
-\emph{Sol.} Mod 3: $\pm1$. Mod 5: $\pm1$. The four combinations give $\{1,4,11,14\}$.
-\item In RSA with $p=5$, $q=11$ and $e=3$, someone computes $d$ as $3^{-1}\bmod55=37$. Does it work?\\
-\emph{Sol.} Not in general: $13^{37}\bmod55=18\neq7$. The reason is that $3\cdot37=111\equiv31\md{40}$, which isn't $1$.
+\emph{Solution.} The solutions are $\pm1$ mod 3 and $\pm1$ mod 5, and the four combinations give $\{1,4,11,14\}$.
+\item In RSA with $p=5$, $q=11$ and $e=3$, someone takes $d=3^{-1}\bmod55=37$. Does that work?\\
+\emph{Solution.} Not in general, since $13^{37}\bmod55=18\neq7$. The problem is that $3\cdot37=111\equiv31\md{40}$, which isn't $1$.
 \item Compute $\varphi(2^5\cdot 7^2)$.\\
-\emph{Sol.} $\varphi(32)\varphi(49)=16\cdot42=672$.
+\emph{Solution.} $\varphi(32)\varphi(49)=16\cdot42=672$.
 \end{enumerate}
 
 \newpage
@@ -809,33 +810,33 @@ To pick a theorem: is the modulus prime? Fermat (exponent mod $p-1$). Not prime 
 \toprule
 \textbf{If the problem asks for\dots} & \textbf{use\dots}\\
 \midrule
-$\gcd(a,b)$ of large numbers & Euclid (last nonzero remainder)\\
-$s,t$ with $sa+tb=\gcd$ & Extended Euclid (back-substitution or the table)\\
-$a^{-1}\bmod m$ & check $\gcd=1$, then Bézout. If $m$ is prime, also $a^{m-2}$\\
-$ax\equiv b\md m$ & $d=\gcd(a,m)$; if $d\mid b$, divide by $d$, and there are $d$ solutions\\
-Several congruences, coprime moduli & CRT (formula or substitution)\\
-Several congruences, non-coprime moduli & split into prime powers and look for clashes\\
-$a^E\bmod p$, $p$ prime & Fermat: $E\bmod(p-1)$\\
-$a^E\bmod n$, $\gcd(a,n)=1$ & Euler: $E\bmod\varphi(n)$\\
-$a^E\bmod n$, $n$ composite & also the CRT with the factors of $n$\\
-$k!\bmod p$ & Wilson, peeling off factors ($p-1\equiv-1$, \dots)\\
-Last $k$ digits & mod $10^k$ with Euler, $\varphi(10^k)=4\cdot10^{k-1}$\\
-Prove $d\mid c$ using coprimality & the Bézout template: $sa+tb=1$, multiply by $c$\\
+$\gcd(a,b)$ of large numbers & Euclid, the last nonzero remainder\\
+$s,t$ with $sa+tb=\gcd$ & extended Euclid, by back-substitution or the table\\
+$a^{-1}\bmod m$ & check $\gcd=1$ and use Bézout, or $a^{m-2}$ when $m$ is prime\\
+$ax\equiv b\md m$ & $d=\gcd(a,m)$, and if $d\mid b$ divide by $d$ to find all $d$ solutions\\
+several congruences with coprime moduli & the CRT, by the formula or by substitution\\
+several congruences with shared factors & split into prime powers and look for clashes\\
+$a^E\bmod p$ with $p$ prime & Fermat, reducing $E$ mod $p-1$\\
+$a^E\bmod n$ with $\gcd(a,n)=1$ & Euler, reducing $E$ mod $\varphi(n)$\\
+$a^E\bmod n$ with $n$ composite & the CRT with the factors of $n$\\
+$k!\bmod p$ & Wilson, peeling off factors such as $p-1\equiv-1$\\
+the last $k$ digits & work mod $10^k$ with Euler, using $\varphi(10^k)=4\cdot10^{k-1}$\\
+a proof that $d\mid c$ using coprimality & the Bézout template, $sa+tb=1$ times $c$\\
 \bottomrule
 \end{tabular}
 \end{center}
 
 \subsection*{Common mistakes, all together}
 \begin{enumerate}
-\item A negative remainder in the division algorithm: $r$ always satisfies $0\le r<d$.
-\item $sa+tb=g$ does not imply $g=\gcd$, except when $g=1$.
-\item Cancelling without checking the gcd: $ac\equiv bc\md m$ gives $a\equiv b\md{m/\gcd(c,m)}$.
-\item Fermat with a composite modulus.
-\item The CRT with non-coprime moduli: there may be no solution, and if there is one it is unique mod the $\lcm$.
-\item $\varphi(mn)=\varphi(m)\varphi(n)$ without coprimality.
-\item In RSA, $d=e^{-1}$ mod $\varphi(n)$, not mod $n$.
-\item In $ax\equiv b$, forgetting that there are $d$ solutions mod $m$, not just one.
-\item Thinking that $p_1\cdots p_k+1$ is prime.
+\item Writing a negative remainder in the division algorithm, when $0\le r<d$ always.
+\item Reading $sa+tb=g$ as $g=\gcd$, which only works when $g=1$.
+\item Cancelling without checking the gcd. From $ac\equiv bc\md m$ you only get $a\equiv b\md{m/\gcd(c,m)}$.
+\item Using Fermat with a composite modulus.
+\item Applying the CRT to moduli that share factors. There may be no solution, and when there is one it's unique mod the $\lcm$.
+\item Writing $\varphi(mn)=\varphi(m)\varphi(n)$ when $m$ and $n$ aren't coprime.
+\item Computing the RSA key $d$ mod $n$ instead of mod $\varphi(n)$.
+\item Giving one solution to $ax\equiv b$ when there are $d$ of them mod $m$.
+\item Assuming $p_1\cdots p_k+1$ must be prime.
 \end{enumerate}
 
 \end{document}
