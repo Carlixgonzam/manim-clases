@@ -266,7 +266,7 @@ class Module2(Lesson):
         names = {(0, 0): r"a^2x_1x_2", (0, 1): r"a\,x_1cy_2", (1, 0): r"a\,by_1x_2", (1, 1): r"bc\,y_1y_2"}
         for (i, j), nm in names.items():
             col = ORANGE if (i, j) == (1, 1) else DEEP
-            r_ = m.Rectangle(width=W, height=Hh, fill_color=col, fill_opacity=0.55, stroke_color=INK,
+            r_ = m.Rectangle(width=W, height=Hh, fill_color=col, fill_opacity=0.85, stroke_color=INK,
                              stroke_width=2).move_to([2.6 + j * W, 0.1 - i * Hh, 0])
             cells[(i, j)] = m.VGroup(r_, tex(nm, 28).move_to(r_))
         top = [tex(r"ax_2", 30, BLUE).next_to(cells[(0, 0)], m.UP, buff=0.15),

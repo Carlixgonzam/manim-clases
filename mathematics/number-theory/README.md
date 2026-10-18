@@ -24,6 +24,6 @@ manimgx render module3_congruences.py Module3 --fps 30
 manimgx render module4_euler_rsa.py Module4 --fps 30
 ```
 
-The shared look (the blueprint theme, cards, captions and helpers) is in `common.py`.
+The shared look (colors, cards, captions and helpers) is in `common.py`.
 
 Guide: `cd guide && pdflatex number_theory_guide.tex` (run it three times for the table of contents).

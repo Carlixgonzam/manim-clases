@@ -1,8 +1,7 @@
 """Shared pieces for the four number theory lessons.
 
-Blueprint look: a navy drafting sheet with a faint grid, light ink lines, translucent solids with bright
-edges, Avenir Next for words, Menlo for tags and STIX Two for math. The camera faces the xz plane, captions
-sit at the bottom, and formulas live on panels pinned to the screen.
+A black stage with solid colored objects, book-style note cards and captions on dark rounded boxes. The
+camera faces the xz plane, captions sit at the bottom, and formulas live on panels pinned to the screen.
 """
 
 import textwrap
@@ -11,27 +10,25 @@ import manimgx as m
 import numpy as np
 
 # ── palette ───────────────────────────────────────────────────────────────────
-BG = "#0E2A47"        # the drafting sheet
-GRID = "#163759"      # grid lines and empty tracks
-INK = "#E6EEF5"       # main lines and text
-MUTED = "#7F9BB8"     # secondary text, inactive marks
-BLUE = "#7FB7E6"
-DEEP = "#2F6FA8"
-PURPLE = "#B9A3E3"
-GREEN = "#4FBF8F"
-GREEN_L = "#8FE0BC"
-TEAL = "#56C2C9"
-AMBER = "#F2C14E"     # the accent: what the eye should follow
-ORANGE = "#F29E6B"
-RED = "#E8604F"
-RED_L = "#F28C7E"
-GREY = "#5D7C9C"
-GREY_D = "#24496E"    # inactive fills, a step above the sheet
-EDGE = "#A9C1D9"
+BG = "#000000"        # the stage
+PANEL_BG = "#0E1117"  # behind cards
+INK = "#FFFFFF"       # main lines and text
+MUTED = "#BBBBBB"     # secondary text, inactive marks
+BLUE = "#3B7DD8"
+DEEP = "#2D5F8A"
+PURPLE = "#8E5CC4"
+GREEN = "#2E8B57"
+GREEN_L = "#5CC48E"
+TEAL = "#1F9E89"
+AMBER = "#F7D96F"     # highlights: what the eye should follow
+ORANGE = "#C8734A"
+RED = "#C0392B"
+RED_L = "#E06C5E"
+GREY = "#6E7681"
+GREY_D = "#3A414A"    # inactive fills
+EDGE = "#9AA4AE"
 
-TEXT_FONT = "Avenir Next"
-MONO_FONT = "Menlo"
-MATH_FONT = "STIX Two Math"
+CARD_FONT = "Georgia"
 
 # kinds of note cards
 C_THEOREM = "theorem"
@@ -41,11 +38,7 @@ C_RULE = "rule"
 C_WORKED = "worked"
 C_QUESTION = "question"
 
-TAG_COLOR = {C_THEOREM: BLUE, C_DEF: TEAL, C_MISTAKE: RED_L, C_RULE: GREEN_L, C_WORKED: PURPLE, C_QUESTION: AMBER}
-
 TEX_PRE = r"\newcommand{\md}[1]{\ (\mathrm{mod}\ #1)}\newcommand{\lcm}{\operatorname{lcm}}"
-MATH_PRE = f'#show math.equation: set text(font: "{MATH_FONT}")'
-TEXT_PRE = f'#set text(font: "{TEXT_FONT}")\n' + MATH_PRE
 
 
 # ── 3D helpers ────────────────────────────────────────────────────────────────
@@ -59,15 +52,11 @@ def up(mob: m.Mobject) -> m.Mobject:
 
 
 def txt(text: str, size: int = 24, color=INK) -> m.Text:
-    return m.Text(text, font=TEXT_FONT, font_size=size, color=color)
-
-
-def mono(text: str, size: int = 24, color=MUTED) -> m.Text:
-    return m.Text(text, font=MONO_FONT, font_size=size, color=color)
+    return m.Text(text, font_size=size, color=color)
 
 
 def tex(s: str, size: int = 36, color=INK) -> m.MathTex:
-    return m.MathTex(TEX_PRE + s, font_size=size, color=color, typst_preamble=MATH_PRE)
+    return m.MathTex(TEX_PRE + s, font_size=size, color=color)
 
 
 def ttex(s: str, size: int = 30, color=INK) -> m.Tex:
@@ -75,20 +64,23 @@ def ttex(s: str, size: int = 30, color=INK) -> m.Tex:
     parts = s.split("$")
     for i in range(0, len(parts), 2):
         parts[i] = parts[i].replace(r"\quad", "   ").replace("\\ ", " ").replace("~", " ")
-    return m.Tex(TEX_PRE + "$".join(parts), font_size=size, color=color, typst_preamble=TEXT_PRE)
+    return m.Tex(TEX_PRE + "$".join(parts), font_size=size, color=color)
+
+
+def solid(opacity: float | None) -> float | None:
+    """Solids stay opaque; only a low opacity (dimming something out) goes through."""
+    return opacity if opacity is not None and opacity < 0.5 else 1.0
 
 
 def tint(mob: m.Mobject, color, opacity: float | None = None):
-    """Animation that repaints a translucent solid, fill and edges together."""
-    a = mob.animate.set_fill(color, opacity=opacity) if opacity is not None else mob.animate.set_fill(color)
-    return a.set_stroke(color)
+    """Animation that repaints a solid."""
+    return mob.animate.set_fill(color, opacity=solid(opacity))
 
 
 def cube(label: str, pos, color: str, side: float = 0.6, size: int = 26, text_color=INK,
          is_tex: bool = False) -> m.Group:
-    """Translucent cube with bright edges and a label on the face toward the camera."""
-    c = m.Cube(side_length=side, fill_color=color, fill_opacity=0.32, stroke_color=color,
-               stroke_width=2).move_to(pos)
+    """Cube with a label on the face toward the camera."""
+    c = m.Cube(side_length=side, fill_color=color, fill_opacity=1, stroke_width=0).move_to(pos)
     if label == "":
         return m.Group(c)
     lab = tex(label, size, text_color) if is_tex else txt(label, size, text_color)
@@ -96,10 +88,10 @@ def cube(label: str, pos, color: str, side: float = 0.6, size: int = 26, text_co
     return m.Group(c, lab)
 
 
-def slab(w: float, h: float, pos, color: str, depth: float = 0.25, opacity: float = 0.38) -> m.Prism:
-    """Translucent rectangular slab standing on the xz plane (width w, height h)."""
-    return m.Prism(dimensions=[w, depth, h], fill_color=color, fill_opacity=opacity, stroke_color=color,
-                   stroke_width=1.5).move_to(pos)
+def slab(w: float, h: float, pos, color: str, depth: float = 0.25, opacity: float = 1.0) -> m.Prism:
+    """Rectangular slab standing on the xz plane (width w, height h)."""
+    return m.Prism(dimensions=[w, depth, h], fill_color=color, fill_opacity=solid(opacity),
+                   stroke_width=0).move_to(pos)
 
 
 def label(text: str, pos, size: int = 24, color=INK, is_tex: bool = False, dy: float = -0.2):
@@ -112,28 +104,23 @@ def sphere(pos, color: str, r: float = 0.22) -> m.Sphere:
 
 
 # ── 2D helpers (pinned to the screen) ─────────────────────────────────────────
-def corner_ticks(box: m.Mobject, color=INK, length: float = 0.24, width: float = 2) -> m.VGroup:
-    """Drafting marks on the four corners of a box."""
-    ticks = m.VGroup()
-    for c, d1, d2 in ((m.UL, m.RIGHT, m.DOWN), (m.UR, m.LEFT, m.DOWN), (m.DL, m.RIGHT, m.UP),
-                      (m.DR, m.LEFT, m.UP)):
-        p = box.get_corner(c)
-        ticks.add(m.Line(p, p + length * d1, color=color, stroke_width=width),
-                  m.Line(p, p + length * d2, color=color, stroke_width=width))
-    return ticks
-
-
 def note_box(title: str, body: m.Mobject, kind: str = C_THEOREM, width: float | None = None) -> m.VGroup:
-    """A note in blueprint style: a monospace tag, the body, and corner marks around a plain panel."""
-    color = TAG_COLOR.get(kind, BLUE)
-    tag = m.Text(title.upper(), font=MONO_FONT, font_size=18, color=color)
-    inner = m.VGroup(tag, body).arrange(m.DOWN, aligned_edge=m.LEFT, buff=0.18)
-    pad = 0.3
-    w = max(inner.width + 2 * pad, width or 0)
-    bg = m.Rectangle(width=w, height=inner.height + 0.46, fill_color=BG, fill_opacity=0.9, stroke_width=0)
+    """Book-style note: a serif title with a period, a thin rule and the body, on a dark panel.
+
+    `kind` doesn't change the look; it's kept so the call says what the note is.
+    """
+    head = m.Text(title.rstrip(".") + ".", font=CARD_FONT, font_size=22, color=INK, weight=m.BOLD)
+    pad = 0.28
+    w = max(body.width, head.width) + 2 * pad if width is None else width
+    head.move_to(m.ORIGIN, aligned_edge=m.UL)
+    rule = m.Line(m.ORIGIN, (w - 2 * pad) * m.RIGHT, color=GREY, stroke_width=1)
+    rule.next_to(head, m.DOWN, buff=0.12, aligned_edge=m.LEFT)
+    body.next_to(rule, m.DOWN, buff=0.2, aligned_edge=m.LEFT)
+    inner = m.VGroup(head, rule, body)
+    bg = m.Rectangle(width=w, height=inner.height + 2 * 0.22, fill_color=PANEL_BG, fill_opacity=0.9,
+                     stroke_width=0)
     bg.move_to(inner).align_to(inner, m.LEFT).shift(pad * m.LEFT)
-    ticks = corner_ticks(bg, RED_L if kind == C_MISTAKE else INK)
-    return m.VGroup(bg, ticks, tag, body)
+    return m.VGroup(bg, head, rule, body)
 
 
 def stack(*items, buff: float = 0.18, aligned=m.LEFT) -> m.VGroup:
@@ -144,8 +131,7 @@ def number_line(lo: int, hi: int, center, width: float, font: int = 18, only=Non
     """Flat number line; `only` limits which numbers are written (only the even ones, say)."""
     skip = [k for k in range(lo, hi + 1) if only is not None and k not in only]
     nl = m.NumberLine(x_range=[lo, hi, 1], length=width, include_numbers=True, font_size=font, color=EDGE,
-                      stroke_width=2, numbers_to_exclude=skip)
-    nl.numbers.set_color(MUTED)
+                      numbers_to_exclude=skip)
     return nl.move_to(center)
 
 
@@ -175,11 +161,10 @@ class Lesson(m.ThreeDScene):
     def cap(self, text: str, color=INK, hold: float | None = None, *anims, run_time: float = 0.6):
         """Caption at the bottom, the way a teacher would say it; waits as long as it takes to read."""
         lines = textwrap.wrap(text, 84)
-        t = m.Text("\n".join(lines), font=TEXT_FONT, font_size=24, color=color)
-        bg = m.Rectangle(width=t.width + 0.6, height=t.height + 0.32, fill_color=BG, fill_opacity=0.88,
-                         stroke_width=0).move_to(t)
-        mark = m.Line(bg.get_corner(m.UL), bg.get_corner(m.DL), color=AMBER, stroke_width=4)
-        new = m.VGroup(bg, mark, t).to_edge(m.DOWN, buff=0.22)
+        t = m.Text("\n".join(lines), font_size=24, color=color)
+        bg = m.RoundedRectangle(width=t.width + 0.5, height=t.height + 0.3, corner_radius=0.12,
+                                fill_color=BG, fill_opacity=0.72, stroke_width=0).move_to(t)
+        new = m.VGroup(bg, t).to_edge(m.DOWN, buff=0.22)
         self.pin(new)
         out = [m.FadeOut(self._cap)] if self._cap is not None else []
         self.play(m.FadeIn(new, shift=0.12 * m.UP), *out, *anims, run_time=run_time)
@@ -196,16 +181,15 @@ class Lesson(m.ThreeDScene):
         """A note pinned to the screen (theorem, definition, common mistake...)."""
         c = note_box(title, body, kind, width)
         if corner is not None:
-            c.to_corner(corner, buff=0.35)
+            c.to_corner(corner, buff=0.3)
             if np.array_equal(corner, m.UL) or np.array_equal(corner, m.UR):
                 c.shift(0.45 * m.DOWN)
         if shift is not None:
             c.shift(shift)
         self.pin(c)
         if write:
-            self.play(m.LaggedStart(m.FadeIn(c[0]), m.Create(c[1]), m.FadeIn(c[2], shift=0.1 * m.RIGHT),
-                                    m.Write(c[3]), lag_ratio=0.25),
-                      run_time=min(3.0, 1.2 + c[3].width * 0.15))
+            self.play(m.LaggedStart(m.FadeIn(c[:3]), m.Write(c[3]), lag_ratio=0.3),
+                      run_time=min(3.0, 1.0 + c[3].width * 0.15))
         else:
             self.play(m.FadeIn(c), run_time=0.6)
         return c
@@ -230,33 +214,25 @@ class Lesson(m.ThreeDScene):
         self.clear_stage()
         self.home()
         title = self.CHAPTERS[n - self.START]
-        num = m.Text(f"{n:02d}", font=MONO_FONT, font_size=60, color=AMBER)
-        frame = m.Square(side_length=max(num.width, num.height) + 0.6, stroke_width=0).move_to(num)
-        badge = m.VGroup(corner_ticks(frame, AMBER, 0.3, 4), num)
-        name = m.Text(title, font=TEXT_FONT, font_size=44, color=INK)
-        card = m.VGroup(badge, name).arrange(m.RIGHT, buff=0.55)
+        ring = m.Circle(radius=0.75, color=AMBER, stroke_width=5)
+        num = m.Text(str(n), font_size=64, color=AMBER).move_to(ring)
+        name = m.Text(title, font_size=44, color=INK)
+        card = m.VGroup(m.VGroup(ring, num), name).arrange(m.RIGHT, buff=0.5)
         if card.width > 13:
             card.scale(13 / card.width)
-        line = m.Line(name.get_corner(m.DL) + 0.18 * m.DOWN, name.get_corner(m.DR) + 0.18 * m.DOWN,
+        line = m.Line(name.get_corner(m.DL) + 0.15 * m.DOWN, name.get_corner(m.DR) + 0.15 * m.DOWN,
                       color=AMBER, stroke_width=3)
-        dims = m.VGroup(m.Line(line.get_start() + 0.1 * m.UP, line.get_start() + 0.1 * m.DOWN, color=AMBER,
-                               stroke_width=3),
-                        m.Line(line.get_end() + 0.1 * m.UP, line.get_end() + 0.1 * m.DOWN, color=AMBER,
-                               stroke_width=3))
-        self.pin(card, line, dims)
-        self.remove(card, line, dims)
-        self.play(m.Create(badge[0]), m.FadeIn(num, scale=0.6), m.Write(name), run_time=1.3)
-        self.play(m.GrowFromCenter(line), m.FadeIn(dims), run_time=0.6)
+        self.pin(card, line)
+        self.play(m.SpinInFromNothing(card[0]), m.Write(name), run_time=1.3)
+        self.play(m.Create(line), run_time=0.6)
         self.wait(0.8)
-        label_ = m.VGroup(m.Text(f"{n:02d}", font=MONO_FONT, font_size=20, color=AMBER),
-                          m.Text(title, font=TEXT_FONT, font_size=20, color=INK)).arrange(m.RIGHT, buff=0.22)
-        label_.to_corner(m.UL, buff=0.24)
+        label_ = m.Text(f"{n}  {title}", font_size=20, color=m.GREY_A).to_corner(m.UL, buff=0.22)
         k = n - self.START + 1
         progress = m.Line([-7.1, 3.98, 0], [-7.1 + 14.2 * k / len(self.CHAPTERS), 3.98, 0], color=AMBER,
-                          stroke_width=4)
+                          stroke_width=5)
         self.pin(label_, progress)
         self.remove(label_, progress)
-        self.play(m.ReplacementTransform(card, label_), m.FadeOut(line), m.FadeOut(dims),
+        self.play(m.ReplacementTransform(card, label_), m.FadeOut(line),
                   m.Transform(self._progress, progress), *([m.FadeOut(self._label)] if self._label else []),
                   run_time=1)
         self._hud.discard(self._label)
@@ -351,7 +327,7 @@ class Lesson(m.ThreeDScene):
             if squeezed and i == 3:
                 slots.append(tex(r"\cdots", 30, MUTED))
                 continue
-            rect = m.Rectangle(width=w_b, height=height, fill_color=DEEP, fill_opacity=0.55, stroke_color=BLUE,
+            rect = m.Rectangle(width=w_b, height=height, fill_color=DEEP, fill_opacity=1, stroke_color=BLUE,
                                stroke_width=2)
             lab = tex(k, 24).move_to(rect)
             if lab.width > w_b - 0.1:
@@ -379,7 +355,7 @@ class Lesson(m.ThreeDScene):
         one_q = m.BraceLabel(body, r"\equiv 1", font_size=28, color=MUTED)
         self.pin(*ones, one_q)
         self.remove(*ones, one_q)
-        self.play(*(b[0].animate.set_fill(GREY_D).set_stroke(GREY) for b in blocks),
+        self.play(*(m.FadeToColor(b[0], GREY_D) for b in blocks),
                   *(m.FadeTransform(b[1], u) for b, u in zip(blocks, ones)),
                   m.FadeTransform(br_q, one_q), m.Indicate(rest, color=AMBER, scale_factor=1.1),
                   run_time=1.0)
@@ -397,17 +373,16 @@ class Lesson(m.ThreeDScene):
         return m.VGroup(head, rest, res)
 
     def title_card(self, title: str, sub: str):
-        head_ = m.Text(title, font=TEXT_FONT, font_size=56, color=INK, weight=m.BOLD)
-        subt = m.Text(sub, font=TEXT_FONT, font_size=30, color=MUTED)
+        head_ = m.Text(title, font_size=56, color=INK)
+        subt = m.Text(sub, font_size=30, color=m.GREY_A)
         head = m.VGroup(head_, subt).arrange(m.DOWN, buff=0.3)
         self.pin(head)
         self.play(m.Write(head_), m.FadeIn(subt, shift=0.2 * m.UP), run_time=1.8)
         self.wait(1.2)
-        self.play(head.animate.scale(0.6).to_edge(m.UP, buff=0.4), run_time=0.9)
-        items = m.VGroup(*(m.VGroup(m.Text(f"{self.START + i:02d}", font=MONO_FONT, font_size=24, color=AMBER),
-                                    m.Text(t, font=TEXT_FONT, font_size=26, color=INK)).arrange(m.RIGHT, buff=0.35)
-                           for i, t in enumerate(self.CHAPTERS))).arrange(m.DOWN, aligned_edge=m.LEFT, buff=0.18)
-        items.next_to(head, m.DOWN, buff=0.5)
+        self.play(head.animate.scale(0.6).to_edge(m.UP, buff=0.35), run_time=0.9)
+        items = m.VGroup(*(m.Text(f"{self.START + i:>2}   {t}", font_size=26, color=m.GREY_A)
+                           for i, t in enumerate(self.CHAPTERS))).arrange(m.DOWN, aligned_edge=m.LEFT, buff=0.16)
+        items.next_to(head, m.DOWN, buff=0.45)
         self.pin(items)
         self.play(m.LaggedStart(*(m.FadeIn(i, shift=0.3 * m.RIGHT) for i in items), lag_ratio=0.12),
                   run_time=2.0)
@@ -416,22 +391,16 @@ class Lesson(m.ThreeDScene):
     def setup_hud(self):
         self.camera.background_color = BG
         self._cap = self._label = None
-        grid = m.VGroup(*(m.Line([x, -4.5, 0], [x, 4.5, 0], stroke_width=1, color=GRID)
-                          for x in np.arange(-7.5, 7.6, 0.5)),
-                        *(m.Line([-8, y, 0], [8, y, 0], stroke_width=1, color=GRID)
-                          for y in np.arange(-4.5, 4.6, 0.5)))
-        grid.set_z_index(-100)
-        track = m.Line([-7.1, 3.98, 0], [7.1, 3.98, 0], color=GRID, stroke_width=4)
-        self._progress = m.Line([-7.1, 3.98, 0], [-7.08, 3.98, 0], color=AMBER, stroke_width=4)
-        self.pin(grid, track, self._progress)
-        self._hud = {grid, track, self._progress}
+        track = m.Line([-7.1, 3.98, 0], [7.1, 3.98, 0], color=m.GREY_D, stroke_width=5)
+        self._progress = m.Line([-7.1, 3.98, 0], [-7.08, 3.98, 0], color=AMBER, stroke_width=5)
+        self.pin(track, self._progress)
+        self._hud = {track, self._progress}
 
     def takeaways(self, points: list[str], next_up: str | None = None):
         self.clear_stage()
-        head = m.Text("Takeaways", font=TEXT_FONT, font_size=40, color=AMBER, weight=m.BOLD)
-        items = m.VGroup(*(m.VGroup(m.Text("—", font=MONO_FONT, font_size=26, color=AMBER),
-                                    m.Text(p, font=TEXT_FONT, font_size=26, color=INK)).arrange(m.RIGHT, buff=0.3)
-                           for p in points)).arrange(m.DOWN, aligned_edge=m.LEFT, buff=0.3)
+        head = m.Text("Takeaways", font_size=40, color=AMBER)
+        items = m.VGroup(*(m.Text("•  " + p, font_size=26, color=INK) for p in points)).arrange(
+            m.DOWN, aligned_edge=m.LEFT, buff=0.28)
         g = m.VGroup(head, items).arrange(m.DOWN, buff=0.5)
         if g.width > 13:
             g.scale(13 / g.width)
@@ -441,5 +410,5 @@ class Lesson(m.ThreeDScene):
                   run_time=0.6 * len(points) + 0.6)
         self.wait(2 + 0.8 * len(points))
         if next_up:
-            self.cap(next_up, MUTED)
+            self.cap(next_up, m.GREY_A)
         self.clear_stage()

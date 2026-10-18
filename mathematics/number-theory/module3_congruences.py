@@ -123,7 +123,7 @@ class Module3(Lesson):
         A, B, Cc, D = 5, 3, 4, 2
         org = np.array([1.9, -1.75, 0])
 
-        def rect(x, y, w, h, col, op=0.55):
+        def rect(x, y, w, h, col, op=0.85):
             return m.Rectangle(width=w * u, height=h * u, fill_color=col, fill_opacity=op, stroke_color=INK,
                                stroke_width=2).move_to(org + np.array([(x + w / 2) * u, (y + h / 2) * u, 0]))
 
@@ -383,8 +383,8 @@ class Module3(Lesson):
                   ttex(r"Split each modulus into prime powers and look for clashes.", 26), C_WORKED, corner=m.UL)
         eqs = [tex(r"x\equiv 7\md{10}", 32).move_to([-3.6, 0.75, 0]),
                tex(r"x\equiv 4\md{35}", 32).move_to([-3.6, -1.25, 0])]
-        mods = {q_: m.VGroup(m.Rectangle(width=1.7, height=0.62, stroke_color=EDGE, stroke_width=2, fill_color=GREY_D,
-                                         fill_opacity=0.6),
+        mods = {q_: m.VGroup(m.RoundedRectangle(width=1.7, height=0.62, corner_radius=0.1, stroke_color=EDGE,
+                                                stroke_width=2, fill_color=GREY_D, fill_opacity=0.6),
                              tex(rf"\bmod {q_}", 30)) for q_ in (2, 5, 7)}
         for q_, y in zip((2, 5, 7), (1.1, -0.25, -1.6)):
             mods[q_].move_to([1.6, y, 0])
@@ -484,9 +484,8 @@ class Module3(Lesson):
         cx, cy, R = 3.4, -0.35, 1.55
         ang = {v: m.PI / 2 - 2 * m.PI * k / 6 for k, v in enumerate((1, 3, 2, 6, 4, 5))}
         spot = {v: np.array([cx + R * math.cos(a_), cy + R * math.sin(a_), 0]) for v, a_ in ang.items()}
-        nodes = {v: m.VGroup(m.Circle(radius=0.32, stroke_color=CLASSES[v - 1], stroke_width=3, fill_color=BG,
-                                      fill_opacity=1),
-                             tex(str(v), 30, CLASSES[v - 1])).move_to(spot[v]) for v in range(1, 7)}
+        nodes = {v: m.LabeledDot(tex(str(v), 30, BG), radius=0.3, color=CLASSES[v - 1]).move_to(spot[v])
+                 for v in range(1, 7)}
         self.pin(*nodes.values())
         self.remove(*nodes.values())
         self.play(m.LaggedStart(*(m.GrowFromCenter(n_) for n_ in nodes.values()), lag_ratio=0.1), run_time=0.9)

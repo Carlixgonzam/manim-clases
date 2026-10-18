@@ -9,7 +9,7 @@ import manimgx as m
 import numpy as np
 
 from common import (AMBER, BG, BLUE, C_DEF, C_MISTAKE, C_QUESTION, C_RULE, C_THEOREM, C_WORKED, DEEP, EDGE,
-                    GREEN, GREEN_L, GREY, GREY_D, INK, MONO_FONT, MUTED, ORANGE, PURPLE, RED, RED_L, TEXT_FONT,
+                    GREEN, GREEN_L, GREY, GREY_D, INK, MUTED, ORANGE, PANEL_BG, PURPLE, RED, RED_L,
                     Lesson, P, cube, label, slab, sphere, stack, tex, tint, ttex)
 
 
@@ -128,8 +128,7 @@ class Module4(Lesson):
             "And with the product formula, 360 = 2³ · 3² · 5 gives 96",
         ])
         x0, y, width = -6.2, -1.55, 8.4
-        bar = m.Rectangle(width=width, height=0.5, fill_color=GREEN, fill_opacity=0.55, stroke_color=GREEN_L,
-                          stroke_width=2)
+        bar = m.Rectangle(width=width, height=0.5, fill_color=GREEN, fill_opacity=0.9, stroke_width=0)
         bar.move_to([x0 + width / 2, y, 0])
         cnt = m.Integer(360, group_with_commas=False, font_size=44, color=GREEN_L).move_to([4.6, y, 0])
         self.pin(bar, cnt)
@@ -141,8 +140,7 @@ class Module4(Lesson):
                  (r"\times\tfrac45", 5, 96, "And removing the multiples of 5 leaves four fifths: 96 = φ(360)")]
         for frac, p_, new, note in steps:
             w2 = w * (p_ - 1) / p_
-            cut = m.Rectangle(width=w - w2, height=0.5, fill_color=RED, fill_opacity=0.6, stroke_color=RED_L,
-                              stroke_width=2)
+            cut = m.Rectangle(width=w - w2, height=0.5, fill_color=RED, fill_opacity=0.9, stroke_width=0)
             cut.move_to([x0 + w2 + (w - w2) / 2, y, 0])
             tag = tex(frac, 34, RED_L).next_to(cut, m.UP, buff=0.2)
             self.pin(cut, tag)
@@ -327,13 +325,12 @@ class Module4(Lesson):
                   C_QUESTION, corner=m.UL)
 
         def box3d(text, x, z, col, w=2.2, is_tex=True):
-            sl = m.Prism(dimensions=[w, 0.5, 0.9], fill_color=col, fill_opacity=0.35, stroke_color=col,
-                         stroke_width=2).move_to(P(x, z))
+            sl = m.Prism(dimensions=[w, 0.5, 0.9], fill_color=col, fill_opacity=1, stroke_width=0).move_to(P(x, z))
             lab = label(text, P(x, z), 34, INK, is_tex=is_tex, dy=-0.28)
             return m.Group(sl, lab)
 
-        b1 = box3d(r"M = 7", -4.6, 0.2, BLUE)
-        b2 = box3d(r"C = 13", 0.0, 0.2, RED_L)
+        b1 = box3d(r"M = 7", -4.6, 0.2, DEEP)
+        b2 = box3d(r"C = 13", 0.0, 0.2, RED)
         b3 = box3d(r"M = 7", 4.6, 0.2, GREEN)
         a1 = m.Arrow3D(P(-3.4, 0.2), P(-1.2, 0.2), color=EDGE, thickness=0.03)
         a2 = m.Arrow3D(P(1.2, 0.2), P(3.4, 0.2), color=EDGE, thickness=0.03)
@@ -421,13 +418,13 @@ class Module4(Lesson):
             right = ttex(a, 29, GREEN_L)
             left.move_to([-3.6, y, 0])
             right.move_to([2.6, y, 0])
-            arr = m.Arrow([-1.2, y, 0], [-0.6, y, 0], buff=0, color=AMBER, stroke_width=3,
+            arr = m.Arrow([-1.2, y, 0], [-0.6, y, 0], buff=0, color=EDGE, stroke_width=3,
                           max_tip_length_to_length_ratio=0.35)
-            bg = m.Rectangle(width=13.6, height=0.46, fill_color=BG if i % 2 else "#123251", fill_opacity=0.9,
+            bg = m.Rectangle(width=13.6, height=0.46, fill_color=PANEL_BG if i % 2 else "#161B22", fill_opacity=0.9,
                              stroke_width=0).move_to([0, y, 0])
             rows.append((bg, left, arr, right))
-        hdr = m.VGroup(m.Text("IF THE PROBLEM ASKS FOR", font=MONO_FONT, font_size=22, color=BLUE).move_to([-3.6, 3.05, 0]),
-                       m.Text("USE", font=MONO_FONT, font_size=22, color=BLUE).move_to([2.6, 3.05, 0]))
+        hdr = m.VGroup(m.Text("If the problem asks for…", font_size=28, color=AMBER).move_to([-3.6, 3.05, 0]),
+                       m.Text("use…", font_size=28, color=AMBER).move_to([2.6, 3.05, 0]))
         self.pin(hdr)
         self.play(m.FadeIn(hdr), run_time=0.5)
         for bg, left, arr, right in rows:
@@ -449,10 +446,9 @@ class Module4(Lesson):
             "In ax ≡ b, giving one solution when there are d",
             "Claiming that p₁···pₖ + 1 is prime",
         ]
-        head = m.Text("Common mistakes, all together", font=TEXT_FONT, font_size=36, color=RED_L, weight=m.BOLD)
-        items = m.VGroup(*(m.VGroup(m.Text(f"{i + 1:02d}", font=MONO_FONT, font_size=24, color=RED_L),
-                                    m.Text(t, font=TEXT_FONT, font_size=26, color=INK)).arrange(m.RIGHT, buff=0.35)
-                           for i, t in enumerate(mistakes))).arrange(m.DOWN, aligned_edge=m.LEFT, buff=0.22)
+        head = m.Text("Common mistakes, all together", font_size=36, color=RED_L)
+        items = m.VGroup(*(m.Text(f"{i + 1}.  {t}", font_size=26, color=INK) for i, t in enumerate(mistakes))).arrange(
+            m.DOWN, aligned_edge=m.LEFT, buff=0.22)
         g = m.VGroup(head, items).arrange(m.DOWN, buff=0.4).move_to([0, 0.1, 0])
         self.pin(g)
         self.play(m.Write(head), run_time=0.8)

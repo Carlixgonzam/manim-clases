@@ -357,8 +357,7 @@ class Module1(Lesson):
                  "so they are coprime")
         rems = [89, 55, 34, 21, 13, 8, 5, 3, 2, 1]
         chart = m.BarChart(rems, y_range=[0, 90, 30], x_length=5.6, y_length=3.2,
-                           bar_colors=[DEEP, BLUE, TEAL, GREEN], bar_fill_opacity=0.55, bar_stroke_width=2,
-                           axis_config={"color": EDGE})
+                           bar_colors=[DEEP, BLUE, TEAL, GREEN], bar_fill_opacity=0.9, bar_stroke_width=0)
         chart.move_to([3.6, -0.55, 0])
         nums = chart.get_bar_labels(color=INK, font_size=22)
         self.pin(chart, nums)
@@ -463,12 +462,11 @@ class Module1(Lesson):
             for j, (e, col) in enumerate(((a_exp[p], BLUE), (b_exp[p], ORANGE))):
                 xx = x + (j - 0.5) * 0.55
                 if e:
-                    bar = m.Prism(dimensions=[0.45, 0.45, e * h], fill_color=col, fill_opacity=0.4, stroke_color=col,
-                                  stroke_width=2)
+                    bar = m.Prism(dimensions=[0.45, 0.45, e * h], fill_color=col, fill_opacity=1, stroke_width=0)
                     bar.move_to(P(xx, -1.6 + e * h / 2))
                 else:
-                    bar = m.Prism(dimensions=[0.45, 0.45, 0.04], fill_color=col, fill_opacity=0.3, stroke_color=col,
-                                  stroke_width=1).move_to(P(xx, -1.58))
+                    bar = m.Prism(dimensions=[0.45, 0.45, 0.04], fill_color=col, fill_opacity=0.5,
+                                  stroke_width=0).move_to(P(xx, -1.58))
                 bars.append((p, j, e, bar))
                 labels.append(label(str(e), P(xx, -1.6 + e * h + 0.25), 20, col))
             labels.append(label(str(p), P(x, -2.0), 28, INK))
